@@ -1,0 +1,51 @@
+name: Update Deploy to Azure Button
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'README.md'
+      - '.github/workflows/update-deploy-button.yml'
+
+jobs:
+  update-readme:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update README with repo info
+        run: |
+          # Get repository owner and name
+          REPO_OWNER="${GITHUB_REPOSITORY_OWNER}"
+          REPO_NAME="${GITHUB_REPOSITORY#*/}"
+          
+          # URL encode the path
+          ENCODED_PATH="${REPO_OWNER}%2F${REPO_NAME}"
+          
+          # Check if placeholder exists
+          if grep -q "YOUR_USERNAME%2FYOUR_REPO" README.md; then
+            echo "Updating placeholder in README.md..."
+            
+            # Replace placeholder with actual repo path
+            sed -i "s/YOUR_USERNAME%2FYOUR_REPO/${ENCODED_PATH}/g" README.md
+            
+            # Configure git
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            
+            # Commit and push if changes were made
+            if git diff --quiet; then
+              echo "No changes needed"
+            else
+              git add README.md
+              git commit -m "chore: Auto-update Deploy to Azure button URL"
+              git push
+              echo "✓ README.md updated with repository info"
+            fi
+          else
+            echo "✓ README.md already configured"
+          fi
