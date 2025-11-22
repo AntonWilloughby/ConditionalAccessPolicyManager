@@ -1,0 +1,372 @@
+/* Custom Styles for CA Policy Manager */
+
+:root {
+    --primary-color: #0078d4;
+    --success-color: #107c10;
+    --danger-color: #d13438;
+    --warning-color: #ff8c00;
+    --info-color: #0078d4;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+}
+
+.navbar {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    background: linear-gradient(90deg, #0078d4 0%, #005a9e 100%) !important;
+}
+
+.card {
+    border: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    margin-bottom: 20px;
+    border-radius: 8px;
+    background-color: #ffffff;
+}
+
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #e9ecef;
+    font-weight: 600;
+    border-radius: 8px 8px 0 0 !important;
+}
+
+/* Main container max-width */
+.main-container {
+    max-width: 1400px;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+/* Nav tabs styling */
+.nav-tabs {
+    background-color: white;
+    padding: 10px 10px 0;
+    border-radius: 8px 8px 0 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Sortable table headers */
+th.sortable {
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.2s ease;
+}
+
+th.sortable:hover {
+    background-color: #e9ecef;
+}
+
+th.sortable i {
+    font-size: 0.8em;
+    opacity: 0.6;
+    margin-left: 4px;
+}
+
+th.sortable:hover i {
+    opacity: 1;
+}
+
+.badge {
+    padding: 0.5em 0.75em;
+}
+
+.nav-tabs .nav-link {
+    color: #666;
+    border: none;
+    border-bottom: 3px solid transparent;
+}
+
+.nav-tabs .nav-link:hover {
+    border-bottom-color: #dee2e6;
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
+    font-weight: 600;
+}
+
+.template-card {
+    transition: transform 0.2s;
+}
+
+.template-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.finding-item {
+    border-left: 4px solid #dee2e6;
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: white;
+    border-radius: 4px;
+}
+
+.finding-item.severity-high {
+    border-left-color: var(--danger-color);
+}
+
+.finding-item.severity-medium {
+    border-left-color: var(--warning-color);
+}
+
+.finding-item.severity-low {
+    border-left-color: var(--info-color);
+}
+
+.recommendation-item {
+    border: 1px solid #dee2e6;
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: white;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.recommendation-item:hover {
+    background-color: #f8f9fa;
+}
+
+.recommendation-item.selected {
+    border-color: var(--primary-color);
+    background-color: #e7f3ff;
+}
+
+.policy-state-enabled {
+    color: var(--success-color);
+}
+
+.policy-state-disabled {
+    color: var(--danger-color);
+}
+
+.policy-state-reporting {
+    color: var(--warning-color);
+}
+
+.toast {
+    min-width: 300px;
+}
+
+.spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+    border-width: 0.15em;
+}
+
+/* Scrollable content */
+.scrollable-content {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.scrollable-content-tall {
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+/* Progress bar */
+.progress-tall {
+    height: 25px;
+}
+
+/* Policy checkbox */
+.policy-checkbox {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+/* Template categories */
+.template-category {
+    margin-bottom: 30px;
+}
+
+.template-category-title {
+    color: var(--primary-color);
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #dee2e6;
+}
+
+/* Custom buttons */
+.btn-deploy {
+    background-color: var(--success-color);
+    color: white;
+    border: none;
+}
+
+.btn-deploy:hover {
+    background-color: #0d6b0d;
+    color: white;
+}
+
+/* Auth method selection cards */
+.auth-method-card {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.auth-method-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    border-color: var(--primary-color);
+}
+
+.auth-method-card i {
+    font-size: 3rem;
+}
+
+.auth-method-card ul {
+    padding-left: 1.2rem;
+}
+
+/* Large icons */
+.icon-large {
+    font-size: 3rem;
+}
+
+/* Hidden form */
+.hidden {
+    display: none;
+}
+
+/* Loading spinner overlay */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .table {
+        font-size: 0.875rem;
+    }
+}
+
+/* AI Explanation Styles */
+.ai-explanation {
+    font-size: 14px;
+    line-height: 1.6;
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+.ai-explanation .card {
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    max-width: 100%;
+}
+
+.ai-explanation .card-body {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+.ai-explanation .card-header {
+    padding: 0.75rem 1rem;
+}
+
+.ai-explanation .card-header h5 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.ai-explanation .card-header i {
+    margin-right: 8px;
+}
+
+.explanation-content,
+.impact-content {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.explanation-content p,
+.impact-content p {
+    margin-bottom: 0.75rem;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.explanation-content ul,
+.impact-content ul {
+    margin-top: 0.5rem;
+    padding-left: 1.5rem;
+}
+
+.recommendations-list {
+    margin-bottom: 0;
+    padding-left: 20px;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.recommendations-list li {
+    margin-bottom: 8px;
+    line-height: 1.5;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
+}
+
+/* Named Locations Styles */
+.ip-range {
+    display: inline-block;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 2px 6px;
+    margin: 2px;
+    font-size: 11px;
+    font-family: 'Courier New', monospace;
+}
+
+#namedLocationsContainer .table td {
+    vertical-align: middle;
+}
+
+#namedLocationsContainer code {
+    font-size: 11px;
+}
+
+.ai-explanation .alert-light {
+    margin-bottom: 0;
+    margin-top: 0;
+    border: 1px dashed #dee2e6;
+    background-color: #f8f9fa;
+}
+
+.ai-explanation strong {
+    color: #212529;
+    font-weight: 600;
+}
+
+.btn-group-sm .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}

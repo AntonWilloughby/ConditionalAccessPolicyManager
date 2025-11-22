@@ -1,0 +1,71 @@
+# Python virtual environment
+.venv/
+venv/
+env/
+ENV/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+*.secret
+*.key
+
+# Credentials and configuration
+config.json
+CA_Policy_Manager/config.json
+!config.json.template
+*.pem
+*.pfx
+
+# Backup files
+*_backup.json
+ca_policies_backup*.json
+
+# User data and uploads
+data/uploads/*
+!data/uploads/.gitkeep
+data/backups/*
+!data/backups/.gitkeep
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.so
+.Python
+*.egg-info/
+.installed.cfg
+*.egg
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Log files
+*.log
+ca_policy_changes.log
+CA_Policy_Manager/*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Temporary files
+*.tmp
+*.temp
+~$*
+
+# Excel temporary files
+~$*.xlsx
+~$*.xls
+
+# Build and distribution
+build/
+dist/
+*.whl
