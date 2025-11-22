@@ -4,13 +4,17 @@ Flask Web Application for Conditional Access Policy Manager
 Supports both local development and Azure App Service deployment
 """
 
-from flask import Flask, render_template, request, jsonify, session, send_file, redirect, url_for
-from werkzeug.utils import secure_filename
 import os
 import sys
 import json
 import tempfile
-from datetime import datetime
+import logging
+from datetime import datetime, timedelta
+from functools import wraps
+from typing import Optional, Callable
+
+from flask import Flask, render_template, request, jsonify, session, send_file, redirect, url_for, g
+from werkzeug.utils import secure_filename
 import msal
 import requests
 from dotenv import load_dotenv
@@ -18,18 +22,48 @@ from dotenv import load_dotenv
 # Load environment variables from .env file (for local development)
 load_dotenv()
 
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+# Enforce supported Python versions (3.11 - 3.12)
+if not ((3, 11) <= sys.version_info[:2] <= (3, 12)):
+    logger.error(
+        "❌ Unsupported Python version detected: %s. "
+        "CA Policy Manager currently supports Python 3.11 and 3.12. "
+        "Install a supported version from https://www.python.org/downloads/ and rerun setup.",
+        f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
+    )
+    sys.exit(1)
+
 # Import modules from current directory
 from ca_policy_manager import ConditionalAccessManager
 from ca_policy_examples import POLICY_TEMPLATES
 from utils.report_analyzer import SecurityReportAnalyzer
 from utils.ai_assistant import PolicyAIAssistant
 from config import get_config
+from session_manager import SessionManager
 
 # Initialize Flask app
 app = Flask(__name__)
 
 # Load configuration based on environment
-app.config.from_object(get_config())
+try:
+    app.config.from_object(get_config())
+except ValueError as e:
+    logger.error(f"❌ Configuration error: {e}")
+    logger.error("Please ensure all required environment variables are set.")
+    sys.exit(1)
+
+# Initialize CSRF protection
+from flask_wtf.csrf import CSRFProtect
+csrf = CSRFProtect(app)
+
+# Initialize session manager (Redis or in-memory fallback)
+session_manager = SessionManager()
 
 # Ensure upload folder exists
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
@@ -52,47 +86,86 @@ if app.config.get('AI_ENABLED'):
         }
         ai_assistant = PolicyAIAssistant(ai_config)
     except Exception as e:
-        print(f"⚠️  Failed to initialize AI Assistant: {e}")
-        print("   AI features will be disabled")
+        logger.warning(f"⚠️  Failed to initialize AI Assistant: {e}")
+        logger.info("   AI features will be disabled")
 else:
-    print("ℹ️  AI features disabled (set AI_ENABLED=true in .env to enable)")
+    logger.info("ℹ️  AI features disabled (set AI_ENABLED=true in .env to enable)")
 
-# Security: Disable SSL verification warning if explicitly disabled in development
-if not app.config.get('VERIFY_SSL', True):
-    import urllib3
-    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-    print("⚠️  WARNING: SSL verification disabled - for development only!")
-    print("   Enable SSL verification for production deployment.")
+# Add security headers middleware
+@app.after_request
+def set_security_headers(response):
+    """Add security headers to all responses"""
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+    response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+    
+    # Get nonce from g if available (for auth callback page)
+    nonce = getattr(g, 'csp_nonce', None)
+    script_src = "script-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'"
+    if nonce:
+        script_src += f" 'nonce-{nonce}'"
+    
+    response.headers['Content-Security-Policy'] = (
+        "default-src 'self'; "
+        f"{script_src}; "
+        "style-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; "
+        "font-src 'self' https://cdn.jsdelivr.net; "
+        "img-src 'self' data: https:; "
+        "connect-src 'self' https://graph.microsoft.com https://login.microsoftonline.com https://cdn.jsdelivr.net"
+    )
+    response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+    return response
 
-# Store manager instances per session (in production, use Redis or similar)
-managers = {}
+# Error handling
+@app.errorhandler(Exception)
+def handle_error(error):
+    """Centralized error handling - don't expose sensitive info"""
+    logger.error(f"Unhandled exception: {error}", exc_info=True)
+    return jsonify({
+        'success': False,
+        'error': 'An error occurred processing your request. Please try again.',
+        'error_code': 'INTERNAL_ERROR'
+    }), 500
 
-# AI usage tracking per session
-ai_usage_stats = {}
+def safe_error_response(error_msg: str, error_type: str = 'OPERATION_FAILED', status_code: int = 400):
+    """Generate safe error response without exposing sensitive details"""
+    logger.error(f"{error_type}: {error_msg}")
+    return jsonify({
+        'success': False,
+        'error': 'Operation failed. Check your credentials and permissions.',
+        'error_type': error_type
+    }), status_code
 
 def get_verify_ssl():
     """Get SSL verification setting from config"""
     return app.config.get('VERIFY_SSL', True)
 
-def get_ai_stats():
+def get_session_id() -> str:
+    """Get or create session ID"""
+    if 'id' not in session:
+        import secrets
+        session['id'] = secrets.token_hex(16)
+    return session['id']
+
+def get_ai_stats() -> dict:
     """Get or initialize AI usage stats for current session"""
-    session_id = session.get('id')
-    if not session_id:
-        session['id'] = os.urandom(16).hex()
-        session_id = session['id']
+    session_id = get_session_id()
+    stats = session_manager.get_ai_stats(session_id)
     
-    if session_id not in ai_usage_stats:
-        ai_usage_stats[session_id] = {
+    if not stats:
+        stats = {
             'explanations': 0,
             'tokens_used': 0,
             'total_cost': 0.0,
             'response_times': []
         }
     
-    return ai_usage_stats[session_id]
+    return stats
 
-def update_ai_stats(tokens_input, tokens_output, response_time):
+def update_ai_stats(tokens_input: int, tokens_output: int, response_time: float):
     """Update AI usage statistics"""
+    session_id = get_session_id()
     stats = get_ai_stats()
     stats['explanations'] += 1
     stats['tokens_used'] += tokens_input + tokens_output
@@ -105,28 +178,29 @@ def update_ai_stats(tokens_input, tokens_output, response_time):
     
     stats['response_times'].append(response_time)
     
+    session_manager.set_ai_stats(session_id, stats)
     return stats
 
 def get_manager():
-    """Get or create manager for current session"""
-    session_id = session.get('id')
-    if not session_id:
-        session['id'] = os.urandom(16).hex()
-        session_id = session['id']
-    
-    if session_id not in managers:
-        managers[session_id] = None
-    
-    return managers[session_id]
+    """Get manager for current session"""
+    session_id = get_session_id()
+    manager_data = session_manager.get_manager(session_id)
+    return manager_data
 
 def set_manager(manager):
     """Store manager for current session"""
-    session_id = session.get('id')
-    if not session_id:
-        session['id'] = os.urandom(16).hex()
-        session_id = session['id']
-    
-    managers[session_id] = manager
+    session_id = get_session_id()
+    # Store manager reference (in production, store config, not the object)
+    if manager:
+        manager_data = {
+            'tenant_id': manager.tenant_id,
+            'client_id': manager.client_id,
+            'client_secret': manager.client_secret,
+            'verify_ssl': manager.verify_ssl
+        }
+        session_manager.set_manager(session_id, manager_data)
+    else:
+        session_manager.set_manager(session_id, None)
 
 @app.route('/')
 def index():
@@ -137,6 +211,17 @@ def index():
 def auth_login():
     """Initiate Entra ID authentication flow with implicit grant"""
     try:
+        # Check if in demo mode
+        demo_mode = app.config.get('DEMO_MODE', False)
+        
+        if demo_mode:
+            return jsonify({
+                'success': False,
+                'error': 'Demo mode is enabled. To use authentication, please set up Azure credentials.',
+                'demo_mode': True,
+                'setup_url': '/setup/azure'
+            }), 400
+        
         # Build authorization URL for implicit flow (token in fragment)
         auth_url = (
             f"{app.config['MSAL_AUTHORITY']}/oauth2/v2.0/authorize?"
@@ -160,7 +245,79 @@ def auth_callback():
     """Handle Entra ID authentication callback - just render page, token handled client-side"""
     # For implicit flow, the token comes in the URL fragment (after #)
     # JavaScript will extract it and send it to the server
-    return render_template('auth_callback.html')
+    # Generate nonce for CSP to allow inline script
+    import secrets
+    nonce = secrets.token_urlsafe(16)
+    g.csp_nonce = nonce
+    return render_template('auth_callback.html', csp_nonce=nonce)
+
+@app.route('/setup/azure', methods=['GET', 'POST'])
+def setup_azure():
+    """Automatic Azure App Registration setup"""
+    if request.method == 'GET':
+        # Show setup page
+        return render_template('azure_setup.html')
+    
+    try:
+        import subprocess
+        from pathlib import Path
+        
+        # Path to PowerShell registration script
+        script_path = Path(__file__).parent.parent / 'scripts' / 'Register-EntraApp-Delegated.ps1'
+        
+        if not script_path.exists():
+            return jsonify({
+                'success': False,
+                'error': 'Registration script not found. Please use manual setup.',
+                'manual_guide': '/docs/QUICK_SETUP.md'
+            }), 404
+        
+        # Check if Azure CLI is installed
+        try:
+            subprocess.run(['az', '--version'], capture_output=True, timeout=5, check=True)
+        except:
+            return jsonify({
+                'success': False,
+                'error': 'Azure CLI not installed. Please install from https://aka.ms/azure-cli',
+                'manual_guide': '/docs/QUICK_SETUP.md'
+            }), 400
+        
+        # Run the PowerShell script
+        logger.info("Running Azure App Registration script...")
+        result = subprocess.run(
+            ['powershell.exe', '-ExecutionPolicy', 'Bypass', '-File', str(script_path)],
+            capture_output=True,
+            text=True,
+            timeout=300
+        )
+        
+        if result.returncode == 0:
+            return jsonify({
+                'success': True,
+                'message': 'Azure App Registration created successfully!',
+                'next_steps': 'Please restart the Flask app to use the new configuration.'
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'Script execution failed',
+                'details': result.stderr,
+                'manual_guide': '/docs/QUICK_SETUP.md'
+            }), 500
+            
+    except subprocess.TimeoutExpired:
+        return jsonify({
+            'success': False,
+            'error': 'Setup timed out (5 minutes)',
+            'manual_guide': '/docs/QUICK_SETUP.md'
+        }), 500
+    except Exception as e:
+        logger.error(f"Azure setup error: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'manual_guide': '/docs/QUICK_SETUP.md'
+        }), 500
 
 @app.route('/api/auth/token', methods=['POST'])
 def receive_token():
@@ -228,7 +385,7 @@ def connect():
         verify_ssl = data.get('verify_ssl', False)  # Default to False for development
         
         if not all([tenant_id, client_id, client_secret]):
-            return jsonify({'success': False, 'error': 'Missing credentials'}), 400
+            return jsonify({'success': False, 'error': 'Missing required credentials'}), 400
         
         # Create manager
         manager = ConditionalAccessManager(
@@ -240,6 +397,7 @@ def connect():
         
         # Authenticate first
         if not manager.authenticate():
+            logger.warning(f"Authentication failed for tenant {tenant_id}")
             return jsonify({
                 'success': False, 
                 'error': 'Authentication failed. Check your credentials.'
@@ -265,6 +423,7 @@ def connect():
                         '5. Click "Grant admin consent"\n'
                         '6. Wait 5 minutes and try again')
             
+            logger.warning(f"Permission denied for tenant {tenant_id}")
             return jsonify({
                 'success': False,
                 'error': error_msg,
@@ -281,7 +440,8 @@ def connect():
         })
         
     except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
+        logger.error(f"Connection error: {str(e)}")
+        return safe_error_response(str(e), 'CONNECTION_FAILED', 500)
 
 @app.route('/api/policies', methods=['GET'])
 def list_policies():
@@ -417,15 +577,17 @@ def create_policy():
             
             if response.status_code in [200, 201]:
                 policy = response.json()
+                logger.info(f"Created policy: {policy_name}")
                 return jsonify({
                     'success': True,
                     'policy': policy,
                     'message': 'Policy created successfully'
                 })
             else:
+                logger.error(f"Failed to create policy: {response.status_code}")
                 return jsonify({
                     'success': False, 
-                    'error': f'Failed to create policy: {response.status_code} - {response.text}'
+                    'error': 'Failed to create policy. Check the policy format and your permissions.'
                 }), response.status_code
         
         # Otherwise use client credentials manager
@@ -445,8 +607,7 @@ def create_policy():
                     'duplicate_policy_id': duplicate.get('id')
                 }), 409  # 409 Conflict
         except Exception as check_error:
-            # If we can't check for duplicates, log it but proceed
-            print(f"Warning: Could not check for duplicate policies: {check_error}")
+            logger.warning(f"Could not check for duplicate policies: {check_error}")
         
         result = manager.create_policy(policy_data)
         
@@ -457,7 +618,8 @@ def create_policy():
         })
         
     except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
+        logger.error(f"Error creating policy: {str(e)}")
+        return safe_error_response(str(e), 'POLICY_CREATE_FAILED', 500)
 
 @app.route('/api/policies/<policy_id>', methods=['PUT'])
 def update_policy(policy_id):
@@ -1224,22 +1386,51 @@ def upload_report():
         if file.filename == '':
             return jsonify({'success': False, 'error': 'No file selected'}), 400
         
-        if file:
-            filename = secure_filename(file.filename)
-            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            file.save(filepath)
-            
-            # Store filepath in session
-            session['report_path'] = filepath
-            
+        # Validate file size
+        file_content = file.read()
+        if len(file_content) > app.config['MAX_CONTENT_LENGTH']:
             return jsonify({
-                'success': True,
-                'filename': filename,
-                'message': 'Report uploaded successfully'
-            })
+                'success': False, 
+                'error': f'File too large (max {app.config["MAX_CONTENT_LENGTH"] / 1024 / 1024}MB)'
+            }), 413
+        
+        file.seek(0)  # Reset file pointer
+        
+        # Validate file extension
+        filename = secure_filename(file.filename)
+        _, ext = os.path.splitext(filename)
+        
+        if ext.lower() not in app.config['ALLOWED_EXTENSIONS']:
+            return jsonify({
+                'success': False,
+                'error': f'File type not allowed. Allowed: {", ".join(app.config["ALLOWED_EXTENSIONS"])}'
+            }), 400
+        
+        # Validate MIME type
+        mime_type = file.content_type
+        if mime_type not in app.config['ALLOWED_MIMETYPES']:
+            return jsonify({
+                'success': False,
+                'error': 'Invalid file type'
+            }), 400
+        
+        # Save file
+        os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(filepath)
+        session['report_path'] = filepath
+        
+        logger.info(f"Uploaded report: {filename}")
+        
+        return jsonify({
+            'success': True,
+            'filename': filename,
+            'message': 'Report uploaded successfully'
+        })
         
     except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
+        logger.error(f"File upload error: {str(e)}")
+        return safe_error_response(str(e), 'UPLOAD_FAILED', 500)
 
 @app.route('/api/report/analyze', methods=['POST'])
 def analyze_report():
@@ -1351,7 +1542,10 @@ def export_findings():
         if not findings:
             return jsonify({'success': False, 'error': 'No findings available'}), 400
         
-        import pandas as pd
+        try:
+            import pandas as pd
+        except ImportError:
+            return jsonify({'success': False, 'error': 'Excel export requires pandas (optional dependency not installed)'}), 500
         
         # Create temporary Excel file
         temp_file = tempfile.NamedTemporaryFile(delete=False, suffix='.xlsx')
@@ -1386,7 +1580,29 @@ def health_check():
         'session_id': session.get('id')
     })
 
+@app.route('/favicon.ico')
+def favicon():
+    """Return 204 for favicon to prevent 500 errors"""
+    return '', 204
+
 if __name__ == '__main__':
-    # Development server - DO NOT use in production!
-    # For production, use gunicorn or waitress
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    # DEVELOPMENT ONLY
+    # For production, use gunicorn or waitress:
+    #   gunicorn --workers 4 --bind 0.0.0.0:8000 app:app
+    # 
+    # Set environment: FLASK_ENV=production
+    # Or in Azure App Service, set startup command to:
+    #   gunicorn --workers 4 --bind 0.0.0.0:8000 app:app
+    
+    debug_mode = os.environ.get('FLASK_ENV') == 'development'
+    port = int(os.environ.get('PORT', 5000))
+    
+    if debug_mode:
+        logger.warning("⚠️  Running in DEVELOPMENT mode - do not use in production!")
+    
+    app.run(
+        host='0.0.0.0',
+        port=port,
+        debug=debug_mode,
+        use_reloader=debug_mode
+    )

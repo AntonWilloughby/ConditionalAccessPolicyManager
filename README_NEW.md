@@ -1,6 +1,6 @@
 # Conditional Access Policy Manager
 
-[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.11–3.12](https://img.shields.io/badge/python-3.11--3.12-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Flask](https://img.shields.io/badge/flask-3.0+-green.svg)](https://flask.palletsprojects.com/)
 [![Microsoft Graph](https://img.shields.io/badge/Microsoft-Graph%20API-blue.svg)](https://docs.microsoft.com/en-us/graph/)
@@ -12,6 +12,7 @@ A modern web-based tool for managing Azure AD Conditional Access policies with A
 ## 🌟 Features
 
 ### Core Functionality
+
 - 🎯 **Deploy from 20+ Enterprise Templates** - Production-ready policy templates for common scenarios
 - 🔄 **Real-time Policy Management** - Create, read, update, and delete CA policies via Microsoft Graph API
 - 🤖 **AI-Powered Explanations** - Get plain-English explanations of complex policies using Azure OpenAI
@@ -20,12 +21,14 @@ A modern web-based tool for managing Azure AD Conditional Access policies with A
 - 🔗 **Azure Portal Integration** - Quick links to related Azure Portal pages
 
 ### Authentication & Security
+
 - 🔐 **Dual Authentication Modes** - Support for both delegated (user) and service principal (app) auth
 - 🛡️ **Secure Session Management** - Session-based tokens, no persistent credential storage
 - ✅ **Duplicate Detection** - Prevents accidentally deploying policies with duplicate names
 - 🔍 **Permission Validation** - Clear error messages for missing Graph API permissions
 
 ### User Experience
+
 - 💅 **Modern UI** - Clean, responsive interface with Bootstrap 5
 - 📱 **Mobile-Friendly** - Works on tablets and mobile devices
 - 🎨 **Beautiful Gradient Theme** - Professional purple gradient design
@@ -49,42 +52,54 @@ A modern web-based tool for managing Azure AD Conditional Access policies with A
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Python 3.11 or higher
+
+- Python 3.11 or 3.12
 - Azure AD tenant with admin privileges
 - Azure AD App Registration with appropriate permissions
 
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/yourusername/conditional-access-policy-manager.git
    cd conditional-access-policy-manager/CA_Policy_Manager_Web
    ```
 
-2. **Create virtual environment**
-   ```bash
-   python -m venv .venv
-   .venv\Scripts\activate  # Windows
-   source .venv/bin/activate  # Mac/Linux
+2. **Run the automated setup** (supports Python 3.11 and 3.12)
+
+   ```powershell
+   # Windows (PowerShell)
+   ./setup-local.ps1
    ```
 
-3. **Install dependencies**
    ```bash
-   pip install -r requirements.txt
+   # macOS/Linux
+   ./setup-local.sh
    ```
 
-4. **Configure environment**
+   The script creates `.venv`, installs all dependencies, and generates `.env` with `DEMO_MODE=true` so you can tour the UI before wiring up Azure.
+
+3. **Add your Azure credentials when ready**
+
    ```bash
-   cp .env.example .env
-   # Edit .env with your Azure AD app details
+   # Edit CA_Policy_Manager_Web/.env
+   MSAL_CLIENT_ID=<your app id>
+   # Optional unless you use client-credential flows
+   MSAL_CLIENT_SECRET=<client secret>
+   DEMO_MODE=false
    ```
 
-5. **Run the application**
+   > ℹ️ After saving `.env`, fully stop any running dev server (`Stop-Process -Name python -Force` on Windows or `pkill -f "python app.py"` on macOS/Linux) so Flask reloads the updated environment variables.
+
+4. **Run the application**
+
    ```bash
+   cd CA_Policy_Manager_Web
    python app.py
    ```
 
-6. **Open browser**
+5. **Open browser**
    Navigate to `http://localhost:5000`
 
 For detailed setup instructions, see [QUICKSTART.md](CA_Policy_Manager_Web/QUICKSTART.md)
@@ -96,12 +111,14 @@ For detailed setup instructions, see [QUICKSTART.md](CA_Policy_Manager_Web/QUICK
 20 pre-configured enterprise-ready templates across 4 categories:
 
 #### 🏢 **Baseline & Admins** (4 policies)
+
 - Block legacy authentication
 - Require MFA for admins
 - Require MFA for Azure management
 - Block access from unknown locations (admins)
 
 #### 👥 **Internals** (9 policies)
+
 - Require MFA for all users
 - Block legacy authentication for all users
 - Require device compliance
@@ -111,12 +128,14 @@ For detailed setup instructions, see [QUICKSTART.md](CA_Policy_Manager_Web/QUICK
 - App protection requirements
 
 #### 🌐 **Guests & External** (4 policies)
+
 - Require MFA for guests
 - Block guest access from untrusted locations
 - Require compliant devices for guests
 - Block high-risk guests
 
 #### 📊 **Attack Surface Reduction** (3 policies)
+
 - Block persistence attempts (risky sign-ins)
 - Require MFA for Box cloud storage
 - Block high-risk administrative actions
@@ -124,6 +143,7 @@ For detailed setup instructions, see [QUICKSTART.md](CA_Policy_Manager_Web/QUICK
 ### AI-Powered Policy Explanations
 
 When enabled, the AI assistant provides:
+
 - **Plain-English Summaries** - Understand what policies do without technical jargon
 - **Impact Analysis** - Know how policies affect your users
 - **Smart Recommendations** - Get suggestions for policy improvements
@@ -132,6 +152,7 @@ When enabled, the AI assistant provides:
 ### Named Locations
 
 View and manage Conditional Access named locations:
+
 - **IP Range Locations** - CIDR notation with trust status
 - **Country/Region Locations** - Geographic restrictions
 - **Trust Indicators** - Visual badges for trusted vs untrusted locations
@@ -140,6 +161,7 @@ View and manage Conditional Access named locations:
 ### Azure Portal Quick Links
 
 One-click access to:
+
 - Conditional Access Insights & Reporting
 - Policy management blade
 - Sign-in logs
@@ -152,13 +174,14 @@ One-click access to:
 ### System Requirements
 
 - **Operating System**: Windows 10/11, macOS 10.15+, or Linux
-- **Python**: 3.11 or higher
+- **Python**: 3.11 or 3.12 (later 3.x releases are currently unsupported)
 - **Memory**: 2GB RAM minimum
 - **Network**: Internet connection for Graph API access
 
 ### Detailed Installation Steps
 
 See [QUICKSTART.md](CA_Policy_Manager_Web/QUICKSTART.md) for:
+
 - Azure AD app registration steps
 - Required Graph API permissions
 - Environment variable configuration
@@ -188,11 +211,13 @@ AZURE_OPENAI_DEPLOYMENT=gpt-4o-mini
 ### Graph API Permissions Required
 
 **Delegated Permissions** (for user login):
+
 - `Policy.Read.All` - Read Conditional Access policies
 - `Policy.ReadWrite.ConditionalAccess` - Manage CA policies
 - `Directory.Read.All` - Read directory data (for group resolution)
 
 **Application Permissions** (for service principal):
+
 - `Policy.Read.All`
 - `Policy.ReadWrite.ConditionalAccess`
 - `Application.Read.All`
@@ -203,17 +228,20 @@ AZURE_OPENAI_DEPLOYMENT=gpt-4o-mini
 ### Basic Workflow
 
 1. **Connect to Azure AD**
+
    - Click "Connect" button
    - Choose authentication method
    - Sign in with admin credentials
 
 2. **View Existing Policies**
+
    - Policies tab shows all current CA policies
    - Sort by name, state, or conditions
    - Click eye icon to view policy JSON
    - Use AI button for plain-English explanation
 
 3. **Deploy Templates**
+
    - Navigate to "Deploy Templates" tab
    - Browse available templates by category
    - Click "Preview" to see policy JSON
@@ -221,6 +249,7 @@ AZURE_OPENAI_DEPLOYMENT=gpt-4o-mini
    - Or use "Deploy All Templates" for bulk deployment
 
 4. **Manage Named Locations**
+
    - Go to "Named Locations" tab
    - Click "Refresh" to load locations
    - View IP ranges, countries, and trust status
@@ -234,17 +263,20 @@ AZURE_OPENAI_DEPLOYMENT=gpt-4o-mini
 ### Advanced Features
 
 #### Bulk Policy Deletion
+
 - Select multiple policies using checkboxes
 - Click "Bulk Delete Selected"
 - Confirm deletion
 - Track progress in real-time
 
 #### Policy Import/Export
+
 - Export policies as JSON for backup
 - Import policies from other tenants
 - Version control your policy configurations
 
 #### AI Cost Monitoring
+
 - View real-time AI usage statistics
 - Track tokens consumed and estimated costs
 - Monitor average response times
@@ -255,6 +287,7 @@ AZURE_OPENAI_DEPLOYMENT=gpt-4o-mini
 ### Template Structure
 
 Each template includes:
+
 - **Display Name** - Descriptive policy name
 - **State** - enabledForReportingButNotEnforced (safe default)
 - **Conditions** - Who, what, when, where
@@ -264,6 +297,7 @@ Each template includes:
 ### Customization
 
 Templates use placeholder groups like:
+
 - `CA-Internals` - Internal employees
 - `CA-Admins-Conditional-Access` - CA administrators
 - `CA-Guests` - External users
@@ -274,6 +308,7 @@ Create these groups in Azure AD before deploying, or modify templates to use you
 ### Modifying Templates
 
 Edit `ca_policy_examples.py` to:
+
 - Add new templates
 - Modify existing templates
 - Adjust default states
@@ -284,6 +319,7 @@ Edit `ca_policy_examples.py` to:
 ### Setup
 
 See [AI_SETUP_GUIDE.md](CA_Policy_Manager_Web/AI_SETUP_GUIDE.md) for:
+
 - Azure OpenAI resource creation
 - API key configuration
 - Model deployment
@@ -307,6 +343,7 @@ See [AI_SETUP_GUIDE.md](CA_Policy_Manager_Web/AI_SETUP_GUIDE.md) for:
 ### Endpoints
 
 #### Policies
+
 - `GET /api/policies` - List all policies
 - `POST /api/policies` - Create policy
 - `GET /api/policies/<id>` - Get policy details
@@ -315,26 +352,31 @@ See [AI_SETUP_GUIDE.md](CA_Policy_Manager_Web/AI_SETUP_GUIDE.md) for:
 - `POST /api/policies/bulk-delete` - Delete multiple policies
 
 #### Templates
+
 - `GET /api/templates` - List available templates
 - `POST /api/templates/deploy` - Deploy single template
 - `POST /api/templates/deploy-all` - Deploy all templates
 
 #### Named Locations
+
 - `GET /api/named-locations` - List named locations
 
 #### AI Features
+
 - `GET /api/policies/<id>/explain` - Get AI explanation
 - `GET /api/ai/stats` - Get usage statistics
 
 ### Authentication
 
 All API endpoints require authentication:
+
 - **Delegated**: Session-based after user login
 - **Client Credentials**: Set in environment variables
 
 ## 🤝 Contributing
 
 We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for:
+
 - Code of conduct
 - Development setup
 - Coding standards
@@ -355,6 +397,7 @@ We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for:
 ### Reporting Vulnerabilities
 
 See [SECURITY.md](SECURITY.md) for:
+
 - How to report security issues
 - Secure usage guidelines
 - Credential management best practices
@@ -415,4 +458,4 @@ conditional-access-policy-manager/
 
 **Made with ❤️ for Azure AD administrators**
 
-*Simplify Conditional Access management and secure your organization with confidence.*
+_Simplify Conditional Access management and secure your organization with confidence._

@@ -39,24 +39,43 @@
         <p>Please wait while we verify your credentials.</p>
     </div>
 
-    <script>
+    <script nonce="{{ csp_nonce }}">
+        console.log('🔐 Auth callback page loaded');
+        console.log('📍 Current URL:', window.location.href);
+        console.log('🔗 Hash fragment:', window.location.hash);
+        
         // Extract token from URL fragment (after #)
         function getTokenFromHash() {
+            console.log('🔍 Extracting token from hash...');
             const hash = window.location.hash.substring(1);
+            console.log('📝 Hash content (first 100 chars):', hash.substring(0, 100));
+            
             const params = new URLSearchParams(hash);
             
-            return {
+            const result = {
                 access_token: params.get('access_token'),
                 token_type: params.get('token_type'),
                 expires_in: params.get('expires_in'),
                 error: params.get('error'),
                 error_description: params.get('error_description')
             };
+            
+            console.log('✅ Token extracted:', {
+                hasToken: !!result.access_token,
+                tokenLength: result.access_token ? result.access_token.length : 0,
+                tokenType: result.token_type,
+                expiresIn: result.expires_in,
+                hasError: !!result.error
+            });
+            
+            return result;
         }
 
         // Send token to server
         async function sendTokenToServer(token) {
+            console.log('📤 Sending token to server...');
             try {
+                console.log('🌐 POST to /api/auth/token');
                 const response = await fetch('/api/auth/token', {
                     method: 'POST',
                     headers: {
@@ -65,30 +84,39 @@
                     body: JSON.stringify({ access_token: token.access_token })
                 });
 
+                console.log('📥 Server response status:', response.status);
                 const data = await response.json();
+                console.log('📦 Server response data:', data);
                 
                 if (data.success) {
+                    console.log('✅ Authentication successful! Redirecting...');
                     // Redirect to main page with success
                     window.location.href = '/?auth=success&count=' + data.count;
                 } else {
+                    console.error('❌ Authentication failed:', data.error);
                     // Redirect with error
                     window.location.href = '/?auth=error&message=' + encodeURIComponent(data.error);
                 }
             } catch (error) {
+                console.error('💥 Exception during token send:', error);
                 window.location.href = '/?auth=error&message=' + encodeURIComponent(error.message);
             }
         }
 
         // Main execution
+        console.log('🚀 Starting token processing...');
         const tokenData = getTokenFromHash();
 
         if (tokenData.error) {
+            console.error('❌ Microsoft returned error:', tokenData.error);
             // Authentication error from Microsoft
             window.location.href = '/?auth=error&message=' + encodeURIComponent(tokenData.error_description || tokenData.error);
         } else if (tokenData.access_token) {
+            console.log('✅ Token found, sending to server...');
             // Got token, send to server
             sendTokenToServer(tokenData);
         } else {
+            console.error('❌ No token in URL fragment');
             // No token found
             window.location.href = '/?auth=error&message=No authentication token received';
         }

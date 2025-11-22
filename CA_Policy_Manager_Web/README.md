@@ -1,7 +1,7 @@
 # Conditional Access Policy Manager - Web Application
 
 > ⚠️ **IMPORTANT:** This is a development version. See [QUICKSTART.md](QUICKSTART.md) to get started quickly!
-> 
+>
 > **Before Production:** Read [SECURITY_REMEDIATION_PLAN.md](docs/SECURITY_REMEDIATION_PLAN.md) and complete [SECURITY_CHECKLIST.md](docs/SECURITY_CHECKLIST.md)
 
 A Flask-based web application for managing Microsoft Entra Conditional Access policies through Microsoft Graph API.
@@ -67,26 +67,42 @@ CA_Policy_Manager_Web/
 
 ## 🚀 Quick Start
 
-1. **Install Dependencies**
-   ```bash
-   pip install -r requirements.txt
+1. **Run the root setup script (recommended)**
+
+   ```powershell
+   # From the repository root
+   ./setup-local.ps1   # Windows (requires Python 3.11 or 3.12)
    ```
+
+   ```bash
+   # Or on macOS/Linux
+   ./setup-local.sh
+   ```
+
+   The script creates `.venv`, installs all dependencies, and seeds `.env` with `DEMO_MODE=true` so you can explore the UI without Azure credentials.
 
 2. **Configure Authentication**
-   - See `docs/SETUP_ENTRA_AUTH.md` for detailed setup
-   - Run `scripts/Register-EntraApp.ps1` to create Azure AD app
+
+   - When you're ready to leave demo mode, edit `CA_Policy_Manager_Web/.env`
+   - Set `MSAL_CLIENT_ID=<your app id>` and `DEMO_MODE=false`
+   - Optional: add `MSAL_CLIENT_SECRET` if you need client credential flows
+   - **Important:** Flask caches environment variables. After changing `.env`, stop any running dev server (`Stop-Process -Name python -Force` on Windows or `pkill -f "python app.py"` on macOS/Linux) before restarting.
 
 3. **Start the Application**
+
    ```bash
+   cd CA_Policy_Manager_Web
    python app.py
    ```
+
    Or use platform-specific scripts:
+
    - Windows: `scripts\start_web_app.bat`
    - Linux/Mac: `scripts/startup.sh`
 
 4. **Access the Application**
    - Open browser to `http://localhost:5000`
-   - Sign in with Entra ID or use client credentials
+   - Sign in with Entra ID (delegated flow). Demo mode shows read-only sample data.
 
 ## 📚 Features
 
@@ -100,16 +116,19 @@ CA_Policy_Manager_Web/
 ## 🔧 Configuration
 
 ### Environment Variables
+
 - `SECRET_KEY`: Flask session secret key (auto-generated if not set)
 - SSL verification is disabled by default for development (set `verify_ssl=False`)
 
 ### Upload Limits
+
 - Max file size: 50MB
 - Supported formats: HTML (Zero Trust reports)
 
 ## 📖 Documentation
 
 Detailed documentation is available in the `docs/` folder:
+
 - **Quick Setup**: `docs/QUICK_SETUP.md`
 - **Authentication**: `docs/SETUP_ENTRA_AUTH.md`
 - **Policy Framework**: `docs/CA_POLICY_FRAMEWORK.md`
@@ -139,11 +158,10 @@ See LICENSE file for details.
 
 ## 📦 Dependencies
 
-Major dependencies:
+Major dependencies (see `requirements.txt` for the full list):
+
 - Flask 3.0.0
 - requests
 - msal (Microsoft Authentication Library)
 - beautifulsoup4 (for report parsing)
-- pandas (for data export)
-
-See `requirements.txt` for complete list.
+- openpyxl (for Excel export without pandas)

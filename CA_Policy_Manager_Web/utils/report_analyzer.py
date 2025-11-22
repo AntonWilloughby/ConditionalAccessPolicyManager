@@ -7,7 +7,12 @@ from bs4 import BeautifulSoup
 import re
 import json
 from typing import List, Dict, Tuple
-import pandas as pd
+
+try:
+    import pandas as pd
+    PANDAS_AVAILABLE = True
+except ImportError:
+    PANDAS_AVAILABLE = False
 
 class SecurityReportAnalyzer:
     """Analyzes security assessment reports and maps to CA policies."""

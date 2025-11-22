@@ -31,6 +31,20 @@ document.addEventListener('DOMContentLoaded', function() {
         // Clean up URL
         window.history.replaceState({}, document.title, '/');
     }
+    
+    // Add event listener for Entra ID sign-in card (backup for onclick)
+    setTimeout(() => {
+        const entraSignInCard = document.querySelector('.auth-method-card:has(.bi-person-circle)');
+        if (entraSignInCard) {
+            console.log('Adding click listener to Entra ID card');
+            entraSignInCard.addEventListener('click', function(e) {
+                console.log('Card clicked via event listener');
+                signInWithEntraID();
+            });
+        } else {
+            console.warn('Entra ID sign-in card not found');
+        }
+    }, 500);
 });
 
 // Show/hide client credentials form
@@ -50,6 +64,88 @@ function hideClientCredsAuth() {
 
 // Sign in with Entra ID (delegated authentication)
 async function signInWithEntraID() {
+    alert('Sign In button clicked!');
+    console.log('signInWithEntraID called');
+    try {
+        const response = await fetch('/auth/login');
+        const data = await response.json();
+        console.log('Auth response:', data, 'Status:', response.status);
+        
+        // Handle demo mode (400 status with demo_mode flag)
+        if (data.demo_mode || (!response.ok && data.error && data.error.includes('Demo mode'))) {
+            console.log('Demo mode detected, showing modal');
+            // Close the connect modal first
+            const connectModal = bootstrap.Modal.getInstance(document.getElementById('connectModal'));
+            if (connectModal) {
+                connectModal.hide();
+            }
+            showDemoModeModal();
+            return;
+        }
+        
+        if (data.success && data.auth_url) {
+            // Redirect to Microsoft login page
+            window.location.href = data.auth_url;
+        } else {
+            showToast('Failed to initiate sign-in: ' + (data.error || 'Unknown error'), 'danger');
+        }
+    } catch (error) {
+        console.error('Sign-in error:', error);
+        showToast('Error initiating sign-in: ' + error.message, 'danger');
+    }
+}
+
+// Show demo mode modal with setup options
+function showDemoModeModal() {
+    const modalHtml = `
+        <div class="modal fade" id="demoModeModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-warning text-dark">
+                        <h5 class="modal-title">
+                            <i class="bi bi-exclamation-triangle"></i> Demo Mode Active
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>The app is running in <strong>Demo Mode</strong>. To use authentication and connect to Azure AD/Microsoft Graph, you need to:</p>
+                        
+                        <h6>Option 1: Automatic Setup (Recommended)</h6>
+                        <p>Let the app automatically create an Azure App Registration for you.</p>
+                        <a href="/setup/azure" class="btn btn-primary mb-3">
+                            <i class="bi bi-magic"></i> Start Automatic Setup
+                        </a>
+                        
+                        <h6>Option 2: Manual Setup</h6>
+                        <p>Set up Azure App Registration manually through the Azure Portal.</p>
+                        <a href="/docs/QUICK_SETUP.md" target="_blank" class="btn btn-outline-secondary">
+                            <i class="bi bi-book"></i> Manual Setup Guide
+                        </a>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Remove existing modal if present
+    const existingModal = document.getElementById('demoModeModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    // Add modal to page
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('demoModeModal'));
+    modal.show();
+}
+
+// Existing function continues...
+async function signInWithEntraIDOld() {
     try {
         const response = await fetch('/auth/login');
         const data = await response.json();

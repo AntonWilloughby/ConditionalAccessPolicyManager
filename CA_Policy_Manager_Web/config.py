@@ -8,8 +8,16 @@ from datetime import timedelta
 
 class Config:
     """Base configuration"""
+    # Demo mode flag
+    DEMO_MODE = os.environ.get('DEMO_MODE', 'false').lower() == 'true'
+    
     # Flask
-    SECRET_KEY = os.environ.get('SECRET_KEY') or os.urandom(24)
+    SECRET_KEY = os.environ.get('SECRET_KEY')
+    if not SECRET_KEY:
+        raise ValueError(
+            "SECRET_KEY environment variable is required. "
+            "Generate with: python -c \"import secrets; print(secrets.token_hex(32))\""
+        )
     
     # Session configuration
     SESSION_COOKIE_NAME = 'ca_policy_session'
@@ -25,8 +33,24 @@ class Config:
         'text/csv'
     }
     
-    # Azure AD OAuth
-    MSAL_CLIENT_ID = os.environ.get('MSAL_CLIENT_ID', 'bcb41e64-e9a8-421c-9331-699dd9041d58')
+    # Azure AD OAuth - REQUIRED in all environments
+    MSAL_CLIENT_ID = os.environ.get('MSAL_CLIENT_ID')
+    # Check for demo mode
+    DEMO_MODE = os.environ.get('DEMO_MODE', 'false').lower() == 'true'
+    
+    # Validate required credentials (only if not in demo mode)
+    if not DEMO_MODE:
+        if not MSAL_CLIENT_ID:
+            raise ValueError(
+                "MSAL_CLIENT_ID environment variable is required. "
+                "Set in .env file or set DEMO_MODE=true for testing. "
+                "See docs/QUICK_SETUP.md for Azure App Registration setup."
+            )
+    
+    MSAL_CLIENT_SECRET = os.environ.get('MSAL_CLIENT_SECRET')
+    # Note: CLIENT_SECRET is optional for delegated (user sign-in) authentication
+    # Only required for application (service-to-service) authentication
+    
     MSAL_AUTHORITY = os.environ.get('MSAL_AUTHORITY', 'https://login.microsoftonline.com/organizations')
     MSAL_REDIRECT_PATH = '/auth/callback'
     MSAL_SCOPE = [
@@ -41,7 +65,7 @@ class Config:
     # Microsoft Graph
     GRAPH_ENDPOINT = 'https://graph.microsoft.com/v1.0'
     
-    # AI Configuration
+    # AI Configuration (optional)
     AZURE_OPENAI_ENDPOINT = os.environ.get('AZURE_OPENAI_ENDPOINT', '')
     AZURE_OPENAI_API_KEY = os.environ.get('AZURE_OPENAI_API_KEY', '')
     AZURE_OPENAI_DEPLOYMENT = os.environ.get('AZURE_OPENAI_DEPLOYMENT', 'gpt-4o-mini')
@@ -61,13 +85,17 @@ class DevelopmentConfig(Config):
     """Development configuration - for localhost testing"""
     DEBUG = True
     
-    # Security (relaxed for development)
+    # Security (relaxed for development only)
     SESSION_COOKIE_SECURE = False  # Allow HTTP for localhost
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = 'Lax'  # Lax for development
     
-    # SSL Verification (can be disabled for corporate proxies)
-    VERIFY_SSL = os.environ.get('DISABLE_SSL_VERIFY', 'false').lower() != 'true'
+    # SSL Verification - always verify by default
+    # To disable for corporate proxy (development only): set VERIFY_SSL=false env var
+    VERIFY_SSL = os.environ.get('VERIFY_SSL', 'true').lower() == 'true'
+    if not VERIFY_SSL:
+        print("⚠️  WARNING: SSL verification disabled - for development with corporate proxy only!")
+        print("   To properly handle corporate proxies, use: requests.certs or REQUESTS_CA_BUNDLE")
     
     # OAuth redirect for localhost
     MSAL_REDIRECT_URI = f"http://localhost:{os.environ.get('PORT', '5000')}/auth/callback"

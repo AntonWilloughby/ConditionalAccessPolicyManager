@@ -1,0 +1,394 @@
+# 🚀 Quick Start Guide - For Anyone Forking This Repo
+
+**Time to First Run**: 5-10 minutes (plus Azure setup if needed)
+
+---
+
+## ✅ Prerequisites
+
+You need:
+
+1. **Python 3.11 or 3.12** installed
+2. **Azure AD App Registration** (for authentication)
+3. **Git** (to clone/fork the repo)
+
+---
+
+## 📦 Automated Setup - Choose Your Platform
+
+### Windows (PowerShell)
+
+```powershell
+# 1. Clone or fork the repository
+git clone https://github.com/YOUR_USERNAME/ConditionalAccessPolicyManager.git
+cd ConditionalAccessPolicyManager
+
+# 2. Run automated setup
+.\setup-local.ps1
+
+# 3. Edit .env file with your Azure credentials
+notepad CA_Policy_Manager_Web\.env
+
+# 4. Stop any running dev server so environment changes reload
+Stop-Process -Name python -Force -ErrorAction SilentlyContinue
+
+# 5. Start the app
+cd CA_Policy_Manager_Web
+python app.py
+
+# 6. Open browser
+# http://localhost:5000
+```
+
+### Linux/macOS (Bash)
+
+```bash
+# 1. Clone or fork the repository
+git clone https://github.com/YOUR_USERNAME/ConditionalAccessPolicyManager.git
+cd ConditionalAccessPolicyManager
+
+# 2. Make setup script executable
+chmod +x setup-local.sh
+
+# 3. Run automated setup
+./setup-local.sh
+
+# 4. Edit .env file with your Azure credentials
+nano CA_Policy_Manager_Web/.env
+# or: vim CA_Policy_Manager_Web/.env
+
+# 5. Stop any running dev server so environment changes reload
+pkill -f "python app.py" 2>/dev/null || true
+
+# 6. Start the app
+cd CA_Policy_Manager_Web
+python app.py
+
+# 7. Open browser
+# http://localhost:5000
+```
+
+---
+
+## 🔐 Azure App Registration Setup
+
+If you don't have Azure credentials yet:
+
+### Option 1: Automated Script (Recommended)
+
+```powershell
+# Windows
+cd scripts
+.\Register-EntraApp-Delegated.ps1
+
+# The script will:
+# ✅ Create App Registration
+# ✅ Configure permissions
+# ✅ Generate credentials
+# ✅ Update your .env file
+```
+
+### Option 2: Manual Setup (5 minutes)
+
+See detailed guide: [docs/QUICK_SETUP.md](docs/QUICK_SETUP.md)
+
+**Quick Steps**:
+
+1. Go to [Azure Portal](https://portal.azure.com) → App Registrations
+2. Click "New registration"
+3. Set redirect URI: `http://localhost:5000/auth/callback`
+4. Add API permissions: `Policy.Read.All`, `Policy.ReadWrite.ConditionalAccess`
+5. Create client secret
+6. Copy Client ID and Secret to `.env`
+
+---
+
+## 📋 What the Setup Script Does
+
+The automated setup script (`setup-local.ps1` or `setup-local.sh`):
+
+1. ✅ **Validates Python** – Accepts only real Python 3.11 or 3.12 installs and tells you when it finds unsupported versions (3.13/3.14)
+2. ✅ **Creates Virtual Environment** – Isolated Python environment in `.venv/`
+3. ✅ **Installs Dependencies** – All 13 packages from `requirements.txt` with an upgraded `pip`
+4. ✅ **Generates SECRET_KEY** – Cryptographically secure session key
+5. ✅ **Creates .env File** – Enables `DEMO_MODE=true` so you can load the UI without Azure credentials
+6. ✅ **Post-Setup Tips** – Highlights missing `MSAL_CLIENT_ID` and reminds you to restart Python after editing `.env`
+
+**Total Time**: ~2-3 minutes (depending on internet speed)
+
+---
+
+## 🧪 Verify Installation
+
+After setup, run validation:
+
+```powershell
+# Validate all 7 security fixes are in place
+.\validate-security-fixes.ps1
+
+# Expected output:
+# ✅ Test 1: No hardcoded credentials
+# ✅ Test 2: Debug mode controlled
+# ✅ Test 3: SSL verification defaults
+# ✅ Test 4: Session manager exists
+# ✅ Test 5: Error handling sanitized
+# ✅ Test 6: CSRF protection enabled
+# ✅ Test 7: Security headers configured
+#
+# Result: ✅ All 7/7 security fixes verified!
+```
+
+---
+
+## 📁 Project Structure After Setup
+
+```
+ConditionalAccessPolicyManager/
+├── .venv/                          # Virtual environment (created by setup)
+├── CA_Policy_Manager_Web/
+│   ├── .env                        # YOUR credentials (created by setup)
+│   ├── .env.example                # Template with documentation
+│   ├── app.py                      # Main Flask application
+│   ├── config.py                   # Configuration management
+│   ├── session_manager.py          # Session storage
+│   ├── requirements.txt            # Python dependencies
+│   └── ...
+├── docs/                           # Detailed documentation
+├── scripts/                        # Helper scripts
+├── setup-local.ps1                 # Windows setup script
+├── setup-local.sh                  # Linux/macOS setup script
+├── validate-security-fixes.ps1     # Security validation
+└── QUICK_START.md                  # This file
+```
+
+---
+
+## 🎯 Minimal .env Configuration
+
+After running setup, edit `CA_Policy_Manager_Web/.env`:
+
+```bash
+# Required once DEMO_MODE=false
+MSAL_CLIENT_ID=your_app_id_here
+
+# Optional (only for client credential flows)
+MSAL_CLIENT_SECRET=your_secret_here
+
+# Auto-generated by setup script (don't change)
+SECRET_KEY=<already_set>
+
+# Optional - Development settings
+FLASK_ENV=development
+VERIFY_SSL=true
+```
+
+**Where to find Azure values**:
+
+- `MSAL_CLIENT_ID`: Azure Portal → App Registration → Overview → Application (client) ID
+- `MSAL_CLIENT_SECRET`: Azure Portal → App Registration → Certificates & secrets → New client secret
+
+---
+
+## 🚀 Running the Application
+
+### First Time Setup
+
+```powershell
+# Windows
+.\setup-local.ps1
+
+# Linux/macOS
+./setup-local.sh
+```
+
+### Every Time You Start Working
+
+```powershell
+# Windows
+Stop-Process -Name python -Force -ErrorAction SilentlyContinue
+cd CA_Policy_Manager_Web
+python app.py
+
+# Linux/macOS
+pkill -f "python app.py" 2>/dev/null || true
+source .venv/bin/activate
+cd CA_Policy_Manager_Web
+python app.py
+```
+
+### Expected Output
+
+```
+⚠️ Running in DEVELOPMENT mode - do not use in production!
+ * Serving Flask app 'app'
+ * Debug mode: on
+ * Running on http://127.0.0.1:5000
+ * Press CTRL+C to quit
+```
+
+Open browser to: **http://localhost:5000**
+
+---
+
+## 🐛 Troubleshooting
+
+### Python Not Found
+
+```powershell
+# Windows - Install from python.org
+# Download: https://www.python.org/downloads/
+# During install: Check "Add Python to PATH"
+
+# Linux/Ubuntu
+sudo apt update
+sudo apt install python3.11 python3.11-venv
+
+# macOS
+brew install python@3.11
+```
+
+### Dependencies Fail to Install
+
+```powershell
+# Upgrade pip first
+pip install --upgrade pip
+
+# Install manually
+cd CA_Policy_Manager_Web
+pip install -r requirements.txt --verbose
+```
+
+### Port Already in Use
+
+```powershell
+# Use different port
+$env:PORT="5001"
+python app.py
+
+# Or find and kill process on port 5000
+# Windows
+netstat -ano | findstr :5000
+taskkill /PID <process_id> /F
+
+# Linux/macOS
+lsof -ti:5000 | xargs kill
+```
+
+### Virtual Environment Issues
+
+```powershell
+# Delete and recreate
+Remove-Item .venv -Recurse -Force    # Windows
+rm -rf .venv                          # Linux/macOS
+
+# Re-run setup
+.\setup-local.ps1                    # Windows
+./setup-local.sh                     # Linux/macOS
+```
+
+### Azure Authentication Errors
+
+```powershell
+# Check .env file has correct values
+Get-Content CA_Policy_Manager_Web\.env | Select-String "MSAL"
+
+# Common issues:
+# ❌ MSAL_CLIENT_ID=your_app_id_here  (not replaced)
+# ✅ MSAL_CLIENT_ID=12345678-abcd-1234-abcd-123456789abc  (actual GUID)
+
+# Verify redirect URI in Azure Portal:
+# Must be: http://localhost:5000/auth/callback
+```
+
+---
+
+## 📚 Additional Resources
+
+| Document                           | Purpose                             | Time   |
+| ---------------------------------- | ----------------------------------- | ------ |
+| **QUICK_START.md**                 | This file - fastest path to running | 5 min  |
+| **LOCAL_TESTING_GUIDE.md**         | Detailed testing and verification   | 20 min |
+| **docs/QUICK_SETUP.md**            | Azure AD setup instructions         | 15 min |
+| **docs/DEPLOY_TO_AZURE_BUTTON.md** | One-click Azure deployment          | 10 min |
+| **SECURITY_FIXES_COMPLETE.md**     | Security improvements summary       | 5 min  |
+
+---
+
+## ✅ Success Checklist
+
+Before you start developing, verify:
+
+- [ ] Python 3.11 or 3.12 installed
+- [ ] Setup script completed successfully
+- [ ] `.env` file created with Azure credentials
+- [ ] Virtual environment activated
+- [ ] Dependencies installed (15 packages)
+- [ ] App starts without errors
+- [ ] Can access http://localhost:5000
+- [ ] Authentication redirects to Microsoft login
+- [ ] Security validation passes (7/7 tests)
+
+---
+
+## 🎉 You're Ready!
+
+If all checks pass, you're ready to:
+
+- ✅ Develop new features
+- ✅ Test Conditional Access policies
+- ✅ Customize for your organization
+- ✅ Deploy to Azure (see deployment docs)
+
+---
+
+## 💡 Pro Tips
+
+### Daily Development
+
+```powershell
+# No need to run setup every time!
+# Just activate venv and run:
+cd CA_Policy_Manager_Web
+python app.py
+```
+
+### Before Committing Code
+
+```powershell
+# Always validate security fixes
+.\validate-security-fixes.ps1
+
+# Should show: ✅ All 7/7 security fixes verified!
+```
+
+### Working with Multiple Tenants
+
+```powershell
+# Create different .env files
+cp .env .env.tenant1
+cp .env .env.tenant2
+
+# Switch between them
+cp .env.tenant1 .env
+python app.py
+```
+
+### Production Deployment
+
+```powershell
+# See deployment guide
+cat docs/DEPLOYMENT.md
+
+# Or use one-click deploy
+cat docs/DEPLOY_TO_AZURE_BUTTON.md
+```
+
+---
+
+**Questions?** Check the comprehensive [LOCAL_TESTING_GUIDE.md](LOCAL_TESTING_GUIDE.md) or raise an issue on GitHub.
+
+**Found a bug?** Security issues → See [SECURITY.md](SECURITY.md) | Other bugs → Open a GitHub issue
+
+---
+
+**Made with ❤️ for IT Admins managing Conditional Access Policies**

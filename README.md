@@ -40,25 +40,100 @@ CA Policy Manager Tool/
 - 💅 **Modern, responsive UI** - Clean interface built with Bootstrap 5
 - 📁 **Policy backups** - Export and import policy configurations
 
-## 🚀 Quick Start
+## 🚀 Quick Start - Automated Setup
 
-### 1. Install Dependencies
+### ⚡ 1-Command Setup (Recommended)
+
+> **Supported Python versions:** 3.11 and 3.12. The checker now fails fast if only Python 3.13/3.14+ is installed (those builds break several dependencies).
+
+**Windows (PowerShell)**
+
+```powershell
+./setup-local.ps1
+```
+
+**Linux/macOS**
+
+```bash
+chmod +x setup-local.sh
+./setup-local.sh
+```
+
+**The setup script now:**
+
+- ✅ Locates a real Python 3.11/3.12 installation (shows unsupported versions it finds)
+- ✅ Creates a fresh `.venv` virtual environment
+- ✅ Installs all 13 Python dependencies with upgraded `pip`
+- ✅ Generates a secure `SECRET_KEY`
+- ✅ Creates `.env` with `DEMO_MODE=true` so you can load the UI without Azure creds
+- ✅ Highlights any missing `MSAL_CLIENT_ID` and explains that the client secret is optional for delegated sign-in
+- ✅ Reminds you to fully stop Python (`Stop-Process -Name python -Force`) when you change `.env`
+
+**Time**: about 2–3 minutes on a broadband connection
+
+### 📝 Finish Configuration
+
+1. Open `CA_Policy_Manager_Web/.env`
+2. Replace the placeholders when you're ready to leave demo mode:
+
+```bash
+MSAL_CLIENT_ID=<your Azure app id>
+# Optional unless you use client-credential auth
+MSAL_CLIENT_SECRET=<client secret>
+DEMO_MODE=false
+```
+
+3. **Hard-restart the dev server after saving `.env`** – Flask caches environment variables. On Windows use `Stop-Process -Name python -Force`; on macOS/Linux run `pkill -f "python app.py"` before launching again.
+
+**Need Azure credentials?** Follow [docs/QUICK_SETUP.md](docs/QUICK_SETUP.md) (≈5 minutes).
+
+### 🚀 Launch the Application
+
+```powershell
+cd CA_Policy_Manager_Web
+python app.py
+```
+
+Open a browser at **http://localhost:5000**. If you left `DEMO_MODE=true`, the UI loads with sample data and the sign-in button will remind you to add real credentials.
+
+### ✅ Verify Setup
+
+```powershell
+./validate-security-fixes.ps1
+# Expected: ✅ All 7/7 security fixes verified!
+```
+
+---
+
+## 📚 Setup Documentation
+
+- **[SETUP_FOR_FORKS.md](SETUP_FOR_FORKS.md)** - Complete setup guide for forked repos (5 min)
+- **[QUICK_START.md](QUICK_START.md)** - Detailed quick start with troubleshooting
+- **[LOCAL_TESTING_GUIDE.md](LOCAL_TESTING_GUIDE.md)** - Comprehensive testing guide
+
+### Alternative: Manual Setup
+
+### 1. Install Dependencies Manually
+
 ```powershell
 cd CA_Policy_Manager_Web
 pip install -r requirements.txt
 ```
 
 ### 2. Launch the Application
+
 ```powershell
 python app.py
 ```
 
 ### 3. Access the Web Interface
+
 Open your browser to `http://localhost:5000`
 
 ## 🔧 Installation
 
 ### Environment Setup
+
 ```powershell
 # Create virtual environment (recommended)
 python -m venv .venv
