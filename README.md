@@ -2,7 +2,7 @@
 
 **Modern Flask web application for managing Azure AD Conditional Access policies via Microsoft Graph API.**
 
-[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FYOUR_USERNAME%2FYOUR_REPO%2Fmain%2Fazure-deploy.json)
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FAntonWilloughby%2FConditionalAccessPolicyManager%2Fmain%2Fazure-deploy.json)
 
 > **Note:** Replace `YOUR_USERNAME/YOUR_REPO` in the badge URL above with your actual GitHub username and repository name.
 
