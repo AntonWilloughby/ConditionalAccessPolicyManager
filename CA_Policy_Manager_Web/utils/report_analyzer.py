@@ -12,6 +12,7 @@ try:
     import pandas as pd
     PANDAS_AVAILABLE = True
 except ImportError:
+    pd = None  # type: ignore
     PANDAS_AVAILABLE = False
 
 class SecurityReportAnalyzer:
@@ -514,8 +515,15 @@ class SecurityReportAnalyzer:
         
         return min(score, 1.0)
     
-    def export_summary(self) -> pd.DataFrame:
-        """Export findings summary as DataFrame."""
+    def export_summary(self):
+        """Export findings summary.
+
+        Returns a pandas DataFrame when pandas is available, otherwise the
+        raw findings list. Callers that require DataFrame operations should
+        ensure pandas is installed.
+        """
+        if not PANDAS_AVAILABLE:
+            return self.findings
         return pd.DataFrame(self.findings)
     
     def get_statistics(self) -> Dict:
@@ -530,12 +538,23 @@ class SecurityReportAnalyzer:
                 'report_type': 'Zero Trust Assessment' if 'zero trust' in str(self.report_data).lower() else 'Security Assessment'
             }
         
-        df = pd.DataFrame(self.findings)
+        if not PANDAS_AVAILABLE:
+            by_severity: Dict[str, int] = {}
+            by_status: Dict[str, int] = {}
+            for finding in self.findings:
+                severity = finding.get('severity', 'Unknown')
+                status = finding.get('status', 'Unknown')
+                by_severity[severity] = by_severity.get(severity, 0) + 1
+                by_status[status] = by_status.get(status, 0) + 1
+        else:
+            df = pd.DataFrame(self.findings)
+            by_severity = df['severity'].value_counts().to_dict() if 'severity' in df else {}
+            by_status = df['status'].value_counts().to_dict() if 'status' in df else {}
         
         return {
             'total_findings': len(self.findings),
-            'by_severity': df['severity'].value_counts().to_dict() if 'severity' in df else {},
-            'by_status': df['status'].value_counts().to_dict() if 'status' in df else {},
+            'by_severity': by_severity,
+            'by_status': by_status,
             'mapped_policy_types': len(set([cat for f in self.findings for cat in f['mapped_policies']])),
             'unmapped_findings': len([f for f in self.findings if not f['mapped_policies']]),
             'report_type': 'Zero Trust Assessment' if 'zero trust' in str(self.report_data).lower() else 'Security Assessment'
