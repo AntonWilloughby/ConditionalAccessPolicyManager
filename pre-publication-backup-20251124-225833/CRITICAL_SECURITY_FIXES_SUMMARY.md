@@ -20,7 +20,7 @@ All 7 critical security issues identified in the security review have been imple
 
 **Changes Made**:
 
-- Removed default `MSAL_CLIENT_ID = '<your-client-id-here>'`
+- Removed default `MSAL_CLIENT_ID = 'bcb41e64-e9a8-421c-9331-699dd9041d58'`
 - Added validation: `MSAL_CLIENT_ID` must be in environment variables
 - Added validation: `MSAL_CLIENT_SECRET` required in all environments
 - Added validation: `SECRET_KEY` required (no random generation fallback)
@@ -29,7 +29,7 @@ All 7 critical security issues identified in the security review have been imple
 **Before**:
 
 ```python
-MSAL_CLIENT_ID = os.environ.get('MSAL_CLIENT_ID', '<your-client-id-here>')  # EXPOSED!
+MSAL_CLIENT_ID = os.environ.get('MSAL_CLIENT_ID', 'bcb41e64-e9a8-421c-9331-699dd9041d58')  # EXPOSED!
 SECRET_KEY = os.environ.get('SECRET_KEY') or os.urandom(24)  # Random if missing
 ```
 
