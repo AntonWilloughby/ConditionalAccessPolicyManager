@@ -17,16 +17,22 @@ CA Policy Manager Tool/
 │   ├── ca_policy_examples.py   # Policy templates
 │   ├── config.py               # Configuration management
 │   ├── requirements.txt        # Python dependencies
-│   ├── CAPolicyWorkbook.json   # Azure workbook for monitoring
 │   ├── templates/              # HTML templates
 │   ├── static/                 # CSS/JS assets
 │   ├── utils/                  # Helper modules (AI, report analyzer)
-│   ├── docs/                   # Documentation
-│   ├── scripts/                # Deployment scripts
+│   ├── docs/                   # App-specific documentation
 │   └── data/                   # User data and backups
 │
-├── README.md                   # This file
-└── README_NEW.md               # Detailed documentation
+├── docs/                       # 📚 All documentation (organized)
+│   ├── setup/                  # Setup and installation guides
+│   ├── security/               # Security and publishing docs
+│   └── archive/                # Archived/outdated docs
+│
+├── setup-local.ps1             # Automated setup (Windows)
+├── setup-local.sh              # Automated setup (macOS/Linux)
+├── SETUP.bat                   # Quick launcher (Windows)
+├── START_APP.bat               # App launcher (Windows)
+└── README.md                   # This file
 ```
 
 ## 🌟 Features
@@ -151,6 +157,12 @@ pip install -r requirements.txt
 - **Detailed Guide**: See `README_NEW.md` for comprehensive documentation
 - **Setup Guides**: Check `CA_Policy_Manager_Web/docs/` for setup and deployment
 - **API Documentation**: See `CA_Policy_Manager_Web/docs/` for Graph API details
+
+## 📚 Documentation
+
+- **Quick Start**: See `docs/setup/QUICK_START.md`
+- **First Time Setup**: See `docs/setup/START_HERE.md`
+- **All Documentation**: Browse `docs/README.md` for complete index
 - **Contributing**: See `CONTRIBUTING.md`
 - **Security**: See `SECURITY.md`
 

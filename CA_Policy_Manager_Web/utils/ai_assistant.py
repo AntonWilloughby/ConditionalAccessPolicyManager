@@ -94,7 +94,7 @@ class PolicyAIAssistant:
                         }
                     ],
                     temperature=0.3,
-                    max_tokens=1500
+                    max_tokens=3000
                 )
                 result_text = response.choices[0].message.content
                 
@@ -147,14 +147,17 @@ Your job is to explain complex security policies in simple, business-friendly la
 
 When explaining a policy:
 1. Start with a one-sentence summary of what the policy does
-2. Explain WHO it affects (which users/groups)
-3. Explain WHEN it applies (conditions like platforms, locations, sign-in risk)
-4. Explain WHAT happens (grant controls or blocks)
-5. Describe the BUSINESS IMPACT (how it affects users in daily work)
-6. Suggest IMPROVEMENTS if applicable
+2. Explain WHO it affects (which users/groups) with specific examples
+3. Explain WHEN it applies (conditions like platforms, locations, sign-in risk) with detailed scenarios
+4. Explain WHAT happens (grant controls or blocks) and the technical reasoning
+5. Describe the BUSINESS IMPACT with concrete examples of how users experience this in their daily work
+6. Suggest IMPROVEMENTS with specific recommendations and rationale
 
-Use clear, non-technical language. Avoid jargon. Be concise but complete.
-Format your response with clear sections using **bold** for headers."""
+Be thorough and detailed in your explanations. Provide specific examples and scenarios to illustrate each point.
+Explain not just WHAT the policy does, but WHY it matters and HOW it affects the organization.
+Include practical examples of user workflows and how they're impacted.
+Format your response with clear sections using **bold** for headers.
+Aim for comprehensive explanations that help stakeholders fully understand the policy's purpose and impact."""
     
     def _build_explanation_prompt(self, policy_json: Dict[str, Any]) -> str:
         """Build the prompt for policy explanation"""
@@ -166,12 +169,17 @@ State: {policy_json.get('state', 'unknown')}
 Configuration:
 {json.dumps(policy_json, indent=2)}
 
+IMPORTANT: When referencing groups, use the displayName from the 'includeGroupsWithNames' or 'excludeGroupsWithNames' arrays if available, NOT the group IDs.
+For example, if you see:
+  "includeGroupsWithNames": [{{"id": "abc-123", "displayName": "External Users"}}]
+Then refer to the group as "External Users" (not the ID abc-123).
+
 Provide your response in this format:
 
 **Summary:** (one sentence explaining what this policy does)
 
 **Who it affects:**
-- (list the users, groups, or roles)
+- (list the users, groups, or roles using their display names, not IDs)
 
 **When it applies:**
 - (list all conditions: platforms, apps, locations, risks, etc.)
@@ -180,10 +188,14 @@ Provide your response in this format:
 - (describe the grant controls, blocks, or session controls)
 
 **User impact:**
-- (describe how users will experience this policy in their daily work)
+- (describe in detail how users will experience this policy in their daily work)
+- (provide specific scenarios and examples of affected workflows)
+- (explain both positive security benefits and potential friction points)
 
 **Recommendations:**
-- (suggest any improvements, security enhancements, or potential issues)
+- (provide detailed suggestions for improvements, security enhancements, or potential issues)
+- (explain the rationale behind each recommendation)
+- (include best practices and industry standards where applicable)
 """
     
     def _parse_explanation_response(self, response_text: str) -> Dict[str, Any]:

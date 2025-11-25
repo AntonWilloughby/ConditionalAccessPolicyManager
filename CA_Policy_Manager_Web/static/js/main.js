@@ -64,7 +64,6 @@ function hideClientCredsAuth() {
 
 // Sign in with Entra ID (delegated authentication)
 async function signInWithEntraID() {
-    alert('Sign In button clicked!');
     console.log('signInWithEntraID called');
     try {
         const response = await fetch('/auth/login');

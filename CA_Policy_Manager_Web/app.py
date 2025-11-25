@@ -726,6 +726,63 @@ def delete_policy(policy_id):
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
+def enrich_policy_with_group_names(policy, access_token):
+    """Enrich policy JSON with group display names for better AI explanations"""
+    try:
+        headers = {
+            'Authorization': f'Bearer {access_token}',
+            'Content-Type': 'application/json'
+        }
+        
+        # Helper to batch lookup group names
+        def lookup_group_names(group_ids):
+            if not group_ids:
+                return []
+            
+            group_info = []
+            for group_id in group_ids:
+                try:
+                    response = requests.get(
+                        f'https://graph.microsoft.com/v1.0/groups/{group_id}?$select=id,displayName',
+                        headers=headers,
+                        verify=get_verify_ssl(),
+                        timeout=5
+                    )
+                    if response.status_code == 200:
+                        group_data = response.json()
+                        group_info.append({
+                            'id': group_id,
+                            'displayName': group_data.get('displayName', group_id)
+                        })
+                    else:
+                        # Keep ID if lookup fails
+                        group_info.append({
+                            'id': group_id,
+                            'displayName': group_id
+                        })
+                except Exception as e:
+                    logger.warning(f"Failed to lookup group {group_id}: {str(e)}")
+                    group_info.append({
+                        'id': group_id,
+                        'displayName': group_id
+                    })
+            return group_info
+        
+        # Enrich includeGroups and excludeGroups
+        if 'conditions' in policy and 'users' in policy['conditions']:
+            users = policy['conditions']['users']
+            
+            if 'includeGroups' in users and users['includeGroups']:
+                users['includeGroupsWithNames'] = lookup_group_names(users['includeGroups'])
+            
+            if 'excludeGroups' in users and users['excludeGroups']:
+                users['excludeGroupsWithNames'] = lookup_group_names(users['excludeGroups'])
+        
+        return policy
+    except Exception as e:
+        logger.warning(f"Failed to enrich policy with group names: {str(e)}")
+        return policy  # Return original policy if enrichment fails
+
 @app.route('/api/policies/<policy_id>/explain', methods=['GET'])
 def explain_policy(policy_id):
     """Get AI explanation of a policy"""
@@ -749,6 +806,9 @@ def explain_policy(policy_id):
             return jsonify({'error': 'Failed to fetch policy', 'details': response.text}), response.status_code
         
         policy = response.json()
+        
+        # Enrich policy with group display names for better AI explanations
+        policy = enrich_policy_with_group_names(policy, session.get('access_token'))
         
         # Get AI explanation
         if ai_assistant and ai_assistant.ai_enabled:
