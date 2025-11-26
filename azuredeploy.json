@@ -1,0 +1,226 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "webAppName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name for the Web App (must be globally unique, will be used as <name>.azurewebsites.net)"
+      },
+      "minLength": 2,
+      "maxLength": 60
+    },
+    "openAIResourceName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name for the Azure OpenAI resource (must be globally unique)"
+      },
+      "minLength": 2,
+      "maxLength": 64
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "eastus2",
+      "allowedValues": [
+        "eastus",
+        "eastus2",
+        "northcentralus",
+        "southcentralus",
+        "westus",
+        "westus3",
+        "swedencentral",
+        "switzerlandnorth",
+        "francecentral",
+        "uksouth"
+      ],
+      "metadata": {
+        "description": "Azure region for resources. Choose a region that supports GPT-4o-mini."
+      }
+    },
+    "appServicePlanSku": {
+      "type": "string",
+      "defaultValue": "B1",
+      "allowedValues": [
+        "F1",
+        "B1",
+        "B2",
+        "B3",
+        "S1",
+        "S2",
+        "S3",
+        "P1v2",
+        "P2v2",
+        "P3v2"
+      ],
+      "metadata": {
+        "description": "App Service Plan pricing tier (F1=Free, B1=Basic $13/mo, S1=Standard $70/mo)"
+      }
+    },
+    "modelCapacity": {
+      "type": "int",
+      "defaultValue": 30,
+      "minValue": 1,
+      "maxValue": 300,
+      "metadata": {
+        "description": "Azure OpenAI tokens per minute capacity (in thousands). Default: 30K TPM"
+      }
+    },
+    "msalClientId": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Azure AD App Registration Client ID (leave empty to configure later)"
+      }
+    },
+    "msalTenantId": {
+      "type": "string",
+      "defaultValue": "organizations",
+      "metadata": {
+        "description": "Azure AD Tenant ID or 'organizations' for multi-tenant"
+      }
+    }
+  },
+  "variables": {
+    "appServicePlanName": "[concat(parameters('webAppName'), '-plan')]",
+    "cognitiveServicesApiVersion": "2023-05-01",
+    "deploymentName": "gpt-4o-mini"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Web/serverfarms",
+      "apiVersion": "2022-03-01",
+      "name": "[variables('appServicePlanName')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "[parameters('appServicePlanSku')]"
+      },
+      "kind": "linux",
+      "properties": {
+        "reserved": true
+      }
+    },
+    {
+      "type": "Microsoft.Web/sites",
+      "apiVersion": "2022-03-01",
+      "name": "[parameters('webAppName')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]"
+      ],
+      "properties": {
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]",
+        "siteConfig": {
+          "linuxFxVersion": "PYTHON|3.12",
+          "alwaysOn": "[if(equals(parameters('appServicePlanSku'), 'F1'), false(), true())]",
+          "appCommandLine": "gunicorn --bind=0.0.0.0:8000 --timeout 600 app:app",
+          "appSettings": [
+            {
+              "name": "SCM_DO_BUILD_DURING_DEPLOYMENT",
+              "value": "true"
+            },
+            {
+              "name": "ENABLE_ORYX_BUILD",
+              "value": "true"
+            },
+            {
+              "name": "AI_ENABLED",
+              "value": "true"
+            },
+            {
+              "name": "AI_PROVIDER",
+              "value": "azure"
+            },
+            {
+              "name": "AZURE_OPENAI_ENDPOINT",
+              "value": "[reference(resourceId('Microsoft.CognitiveServices/accounts', parameters('openAIResourceName'))).endpoint]"
+            },
+            {
+              "name": "AZURE_OPENAI_DEPLOYMENT",
+              "value": "[variables('deploymentName')]"
+            },
+            {
+              "name": "MSAL_CLIENT_ID",
+              "value": "[parameters('msalClientId')]"
+            },
+            {
+              "name": "MSAL_TENANT_ID",
+              "value": "[parameters('msalTenantId')]"
+            },
+            {
+              "name": "MSAL_REDIRECT_PATH",
+              "value": "/auth/callback"
+            },
+            {
+              "name": "SESSION_TYPE",
+              "value": "filesystem"
+            },
+            {
+              "name": "DEMO_MODE",
+              "value": "false"
+            }
+          ]
+        },
+        "httpsOnly": true
+      }
+    },
+    {
+      "type": "Microsoft.CognitiveServices/accounts",
+      "apiVersion": "[variables('cognitiveServicesApiVersion')]",
+      "name": "[parameters('openAIResourceName')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "S0"
+      },
+      "kind": "OpenAI",
+      "properties": {
+        "customSubDomainName": "[parameters('openAIResourceName')]",
+        "publicNetworkAccess": "Enabled"
+      }
+    },
+    {
+      "type": "Microsoft.CognitiveServices/accounts/deployments",
+      "apiVersion": "[variables('cognitiveServicesApiVersion')]",
+      "name": "[concat(parameters('openAIResourceName'), '/', variables('deploymentName'))]",
+      "dependsOn": [
+        "[resourceId('Microsoft.CognitiveServices/accounts', parameters('openAIResourceName'))]"
+      ],
+      "sku": {
+        "name": "Standard",
+        "capacity": "[parameters('modelCapacity')]"
+      },
+      "properties": {
+        "model": {
+          "format": "OpenAI",
+          "name": "gpt-4o-mini",
+          "version": "2024-07-18"
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "webAppUrl": {
+      "type": "string",
+      "value": "[concat('https://', reference(resourceId('Microsoft.Web/sites', parameters('webAppName'))).defaultHostName)]"
+    },
+    "webAppName": {
+      "type": "string",
+      "value": "[parameters('webAppName')]"
+    },
+    "openAIEndpoint": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.CognitiveServices/accounts', parameters('openAIResourceName'))).endpoint]"
+    },
+    "openAIResourceName": {
+      "type": "string",
+      "value": "[parameters('openAIResourceName')]"
+    },
+    "deploymentName": {
+      "type": "string",
+      "value": "[variables('deploymentName')]"
+    },
+    "nextSteps": {
+      "type": "string",
+      "value": "[concat('1. Get OpenAI API Key: Azure Portal → ', parameters('openAIResourceName'), ' → Keys and Endpoint. 2. Add AZURE_OPENAI_API_KEY and SECRET_KEY to Web App Configuration. 3. Update Azure AD redirect URI to: ', reference(resourceId('Microsoft.Web/sites', parameters('webAppName'))).defaultHostName, '/auth/callback. 4. Deploy code via VS Code, Git, or Azure CLI.')]"
+    }
+  }
+}

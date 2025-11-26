@@ -63,6 +63,14 @@ if (-not $pythonCmd) {
 
 Write-Host ""
 
+# Verify we have a valid Python command before continuing
+if ([string]::IsNullOrEmpty($pythonCmd)) {
+    Write-Host "❌ Cannot proceed without Python 3.11 or 3.12" -ForegroundColor Red
+    Write-Host ""
+    pause
+    exit 1
+}
+
 # Create virtual environment
 Write-Host ""
 Write-Host "2️⃣  Creating virtual environment..." -ForegroundColor Cyan
@@ -124,6 +132,12 @@ if (-not (Test-Path .env)) {
     Write-Host "⚠️  .env file not found" -ForegroundColor Yellow
     Write-Host "   Creating from template..." -ForegroundColor Yellow
     
+    # Verify Python command is available
+    if ([string]::IsNullOrEmpty($pythonCmd)) {
+        Write-Host "❌ Python command not available for generating SECRET_KEY" -ForegroundColor Red
+        exit 1
+    }
+    
     # Generate SECRET_KEY automatically
     $secretKey = & $pythonCmd -c "import secrets; print(secrets.token_hex(32))"
     
@@ -166,6 +180,7 @@ else {
     if ($clientSecretPlaceholder) {
         Write-Host "ℹ️  MSAL_CLIENT_SECRET is still a placeholder. This is optional for delegated sign-in but required for client credential flows." -ForegroundColor Yellow
     }
+}
 }
 
 Write-Host ""
