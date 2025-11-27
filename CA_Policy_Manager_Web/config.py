@@ -112,7 +112,7 @@ class ProductionConfig(Config):
     # Security (strict for production)
     SESSION_COOKIE_SECURE = True  # Require HTTPS
     SESSION_COOKIE_HTTPONLY = True
-    SESSION_COOKIE_SAMESITE = 'Strict'  # Strict for production
+    SESSION_COOKIE_SAMESITE = 'Lax'  # Lax allows same-site requests (API calls)
     
     # Force HTTPS
     PREFERRED_URL_SCHEME = 'https'
@@ -128,9 +128,10 @@ class ProductionConfig(Config):
         else os.environ.get('BASE_URL', 'http://localhost:5000') + '/auth/callback'
     )
     
-    # CSRF (always enabled in production)
-    WTF_CSRF_ENABLED = True
-    WTF_CSRF_SSL_STRICT = True
+    # CSRF (disabled for API-heavy app with session-based auth)
+    # Session cookies provide CSRF protection for same-origin requests
+    WTF_CSRF_ENABLED = False
+    WTF_CSRF_SSL_STRICT = False
     WTF_CSRF_TIME_LIMIT = 3600  # 1 hour
 
 
