@@ -62,6 +62,18 @@ except ValueError as e:
 from flask_wtf.csrf import CSRFProtect
 csrf = CSRFProtect(app)
 
+# Exempt all /api/* and /auth/* routes from CSRF (they're called via JavaScript)
+@csrf.exempt
+def exempt_views():
+    """Exempt API and auth routes from CSRF protection"""
+    pass
+
+@app.before_request
+def csrf_protect_check():
+    """Skip CSRF for API endpoints and auth routes"""
+    if request.path.startswith('/api/') or request.path.startswith('/auth/'):
+        csrf._exempt_views.add(request.endpoint)
+
 # Initialize session manager (Redis or in-memory fallback)
 session_manager = SessionManager()
 
