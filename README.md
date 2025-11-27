@@ -2,9 +2,43 @@
 
 **Modern Flask web application for managing Azure AD Conditional Access policies via Microsoft Graph API.**
 
+## ☁️ Deploy to Azure (Recommended for Production)
+
+### Option 1: Fully Automated (One Command) ⭐
+
+```powershell
+# Windows - Interactive wizard
+.\DEPLOY_TO_AZURE.bat
+
+# OR Windows PowerShell
+.\deploy-to-azure.ps1 -ResourceGroupName "ca-policy-rg" -WebAppName "my-ca-manager" -OpenAIName "my-openai-helper"
+
+# macOS / Linux
+./deploy-to-azure.sh -g ca-policy-rg -w my-ca-manager -o my-openai-helper
+```
+
+**Fully automated deployment includes:**
+
+- ✅ Creates Azure App Service + Azure OpenAI
+- ✅ Configures all app settings automatically
+- ✅ Generates secure secrets
+- ✅ Creates Azure AD App Registration
+- ✅ Deploys application code
+- ✅ Enables diagnostic logging
+
+**Time:** 10-12 minutes | **Cost:** $0-13/month
+
+📖 **[Complete Automation Guide](AUTOMATED_DEPLOYMENT.md)**
+
+### Option 2: Deploy to Azure Button
+
 [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FAntonWilloughby%2FConditionalAccessPolicyManager%2Fmain%2Fazuredeploy.json)
 
-> **One-Click Azure Deployment:** Click the button above to deploy the web app and Azure OpenAI resources automatically. See [Azure Deployment Guide](AZURE_DEPLOYMENT_QUICKSTART.md) for details.
+Click button → Fill parameters → Deploy resources → Configure settings manually
+
+📖 **[Manual Deployment Guide](AZURE_DEPLOYMENT_QUICKSTART.md)** | **[Deploy Button Guide](DEPLOY_BUTTON_GUIDE.md)**
+
+---
 
 ## 📁 Project Structure
 
@@ -46,9 +80,9 @@ CA Policy Manager Tool/
 - 💅 **Modern, responsive UI** - Clean interface built with Bootstrap 5
 - 📁 **Policy backups** - Export and import policy configurations
 
-## 🚀 Quick Start - Automated Setup
+## 🚀 Quick Start - Local Development
 
-### ⚡ 1-Command Setup (Recommended)
+### ⚡ 1-Command Setup (Windows/macOS/Linux)
 
 > **Supported Python versions:** 3.11 and 3.12. The checker now fails fast if only Python 3.13/3.14+ is installed (those builds break several dependencies).
 

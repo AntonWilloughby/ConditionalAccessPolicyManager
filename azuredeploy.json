@@ -39,7 +39,7 @@
     },
     "appServicePlanSku": {
       "type": "string",
-      "defaultValue": "B1",
+      "defaultValue": "F1",
       "allowedValues": [
         "F1",
         "B1",
@@ -53,7 +53,7 @@
         "P3v2"
       ],
       "metadata": {
-        "description": "App Service Plan pricing tier (F1=Free, B1=Basic $13/mo, S1=Standard $70/mo)"
+        "description": "App Service Plan pricing tier (F1=Free [no quota needed], B1=Basic $13/mo, S1=Standard $70/mo)"
       }
     },
     "modelCapacity": {
