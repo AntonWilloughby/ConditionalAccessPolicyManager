@@ -34,9 +34,20 @@
 
 [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FAntonWilloughby%2FConditionalAccessPolicyManager%2Fmain%2Fazuredeploy.json)
 
-Click button → Fill parameters → Deploy resources → Configure settings manually
+**⏱️ Time:** 15-20 minutes | **💰 Cost:** Free tier available (F1) or $13/month (B1)
 
-📖 **[Manual Deployment Guide](AZURE_DEPLOYMENT_QUICKSTART.md)** | **[Deploy Button Guide](DEPLOY_BUTTON_GUIDE.md)**
+**📖 Important:** The Deploy button creates Azure resources but requires 2 additional manual steps:
+
+1. **Deploy application code** (via GitHub or Azure CLI)
+2. **Create Azure AD App Registration** (for authentication)
+
+**👉 [Complete Deployment Guide](DEPLOY_BUTTON_COMPLETE_GUIDE.md)** - Follow this for step-by-step instructions
+
+**✅ Validate deployment:** After clicking the button, run:
+
+```powershell
+.\validate-deployment.ps1 -WebAppName "your-app-name" -ResourceGroup "your-rg-name"
+```
 
 ---
 

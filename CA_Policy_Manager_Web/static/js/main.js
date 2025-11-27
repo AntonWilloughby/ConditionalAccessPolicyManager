@@ -191,17 +191,54 @@ function updateConnectionStatus(connected) {
     const badge = document.getElementById('connectionStatus');
     const connectBtn = document.getElementById('connectBtn');
     const disconnectBtn = document.getElementById('disconnectBtn');
+    const userInfoCard = document.getElementById('userInfoCard');
     
     if (connected) {
         badge.className = 'badge bg-success me-3';
         badge.textContent = 'Connected';
         connectBtn.classList.add('d-none');
         disconnectBtn.classList.remove('d-none');
+        
+        // Load and display user info
+        loadUserInfo();
     } else {
         badge.className = 'badge bg-secondary me-3';
         badge.textContent = 'Not Connected';
         connectBtn.classList.remove('d-none');
         disconnectBtn.classList.add('d-none');
+        
+        // Hide user info card
+        if (userInfoCard) {
+            userInfoCard.classList.add('d-none');
+        }
+    }
+}
+
+// Load user information
+async function loadUserInfo() {
+    try {
+        const response = await fetch('/api/user/info');
+        const data = await response.json();
+        
+        if (data.success && data.user) {
+            const userInfoCard = document.getElementById('userInfoCard');
+            const userDisplayName = document.getElementById('userDisplayName');
+            const userTenantInfo = document.getElementById('userTenantInfo');
+            
+            // Update display
+            userDisplayName.textContent = data.user.displayName || data.user.userPrincipalName || 'User';
+            userDisplayName.title = data.user.userPrincipalName || '';
+            
+            const tenantName = data.tenant?.displayName || 'Unknown Tenant';
+            const tenantId = data.tenant?.id ? data.tenant.id.substring(0, 8) + '...' : '';
+            userTenantInfo.textContent = `${tenantName} ${tenantId}`;
+            userTenantInfo.title = `Tenant: ${data.tenant?.displayName || 'Unknown'}\nID: ${data.tenant?.id || 'N/A'}`;
+            
+            // Show card
+            userInfoCard.classList.remove('d-none');
+        }
+    } catch (error) {
+        console.error('Error loading user info:', error);
     }
 }
 

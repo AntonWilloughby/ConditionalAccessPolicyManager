@@ -16,6 +16,21 @@
                 <i class="bi bi-shield-lock-fill"></i> Conditional Access Policy Manager
             </span>
             <div class="d-flex align-items-center">
+                <!-- User Info Card (shown when connected) -->
+                <div id="userInfoCard" class="d-none me-3">
+                    <div class="card border-light" style="min-width: 250px;">
+                        <div class="card-body p-2">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-person-circle fs-4 text-primary me-2"></i>
+                                <div style="font-size: 0.85rem;">
+                                    <div class="fw-bold text-truncate" id="userDisplayName" style="max-width: 180px;">-</div>
+                                    <div class="text-muted small" id="userTenantInfo">-</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
                 <span id="connectionStatus" class="badge bg-secondary me-3">Not Connected</span>
                 <span id="aiCostBadge" class="badge bg-info me-3 d-none" title="AI usage this session">
                     <i class="bi bi-currency-dollar"></i> <span id="aiCostAmount">$0.00</span>

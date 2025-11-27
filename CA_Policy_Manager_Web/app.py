@@ -362,13 +362,12 @@ def receive_token():
 def disconnect():
     """Disconnect and clear session"""
     try:
-        session_id = session.get('id')
+        session_id = get_session_id()
         
-        # Clear the manager
-        if session_id and session_id in managers:
-            managers[session_id] = None
+        # Clear the manager from session
+        session_manager.set_manager(session_id, None)
         
-        # Clear session data
+        # Clear session data (including access_token for delegated auth)
         session.clear()
         
         return jsonify({
@@ -1643,6 +1642,63 @@ def health_check():
         'connected': manager is not None,
         'session_id': session.get('id')
     })
+
+@app.route('/api/user/info', methods=['GET'])
+def get_user_info():
+    """Get current user information"""
+    try:
+        # Check if using delegated auth
+        if session.get('auth_method') == 'delegated' and session.get('access_token'):
+            headers = {
+                'Authorization': f'Bearer {session["access_token"]}',
+                'Content-Type': 'application/json'
+            }
+            
+            # Get user profile from Microsoft Graph
+            user_response = requests.get(
+                'https://graph.microsoft.com/v1.0/me',
+                headers=headers,
+                verify=get_verify_ssl()
+            )
+            
+            # Get organization info
+            org_response = requests.get(
+                'https://graph.microsoft.com/v1.0/organization',
+                headers=headers,
+                verify=get_verify_ssl()
+            )
+            
+            if user_response.status_code == 200:
+                user_data = user_response.json()
+                org_data = org_response.json() if org_response.status_code == 200 else {}
+                
+                org_info = org_data.get('value', [{}])[0] if org_data.get('value') else {}
+                
+                return jsonify({
+                    'success': True,
+                    'user': {
+                        'displayName': user_data.get('displayName'),
+                        'userPrincipalName': user_data.get('userPrincipalName'),
+                        'mail': user_data.get('mail'),
+                        'id': user_data.get('id')
+                    },
+                    'tenant': {
+                        'id': org_info.get('id'),
+                        'displayName': org_info.get('displayName'),
+                        'tenantType': org_info.get('tenantType')
+                    }
+                })
+            else:
+                return jsonify({'success': False, 'error': 'Unable to retrieve user info'}), 401
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'Not authenticated with delegated credentials'
+            }), 401
+            
+    except Exception as e:
+        logger.error(f"Error getting user info: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/favicon.ico')
 def favicon():
