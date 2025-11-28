@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conditional Access Policy Manager</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <nav class="navbar navbar-dark bg-primary">
+        <div class="container-fluid">
+            <span class="navbar-brand mb-0 h1">
+                <i class="bi bi-shield-lock-fill"></i> Conditional Access Policy Manager
+            </span>
+            <div class="d-flex align-items-center">
+                <!-- User Info Card (shown when connected) -->
+                <div id="userInfoCard" class="d-none me-3">
+                    <div class="card border-light" style="min-width: 250px;">
+                        <div class="card-body p-2">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-person-circle fs-4 text-primary me-2"></i>
+                                <div style="font-size: 0.85rem;">
+                                    <div class="fw-bold text-truncate" id="userDisplayName" style="max-width: 180px;">-</div>
+                                    <div class="text-muted small" id="userTenantInfo">-</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <span id="connectionStatus" class="badge bg-secondary me-3">Not Connected</span>
+                <span id="aiCostBadge" class="badge bg-info me-3 d-none" title="AI usage this session">
+                    <i class="bi bi-currency-dollar"></i> <span id="aiCostAmount">$0.00</span>
+                </span>
+                <button class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#connectModal" id="connectBtn">
+                    <i class="bi bi-plug"></i> Connect
+                </button>
+                <button class="btn btn-outline-light btn-sm ms-2 d-none" onclick="disconnect()" id="disconnectBtn">
+                    <i class="bi bi-plug-fill"></i> Disconnect
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mt-4 main-container">
+        <ul class="nav nav-tabs" id="mainTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="policies-tab" data-bs-toggle="tab" data-bs-target="#policies" type="button">
+                    <i class="bi bi-list-ul"></i> Policies
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="templates-tab" data-bs-toggle="tab" data-bs-target="#templates" type="button">
+                    <i class="bi bi-box-seam"></i> Deploy Templates
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="report-tab" data-bs-toggle="tab" data-bs-target="#report" type="button">
+                    <i class="bi bi-file-earmark-bar-graph"></i> Import Report
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="named-locations-tab" data-bs-toggle="tab" data-bs-target="#named-locations" type="button">
+                    <i class="bi bi-geo-alt"></i> Named Locations
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="azure-portal-tab" data-bs-toggle="tab" data-bs-target="#azure-portal" type="button">
+                    <i class="bi bi-box-arrow-up-right"></i> Azure Portal Links
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content mt-3" id="mainTabContent">
+            <!-- Policies Tab -->
+            <div class="tab-pane fade show active" id="policies" role="tabpanel">
+                <!-- AI Usage Statistics - Compact -->
+                <div id="aiStatsCard" class="alert alert-light border mb-3 d-none">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0"><i class="bi bi-stars text-primary"></i> AI Usage</h6>
+                        <div class="d-flex gap-4 small">
+                            <span><i class="bi bi-lightbulb text-info"></i> <strong id="aiExplanationsCount">0</strong> explanations</span>
+                            <span><i class="bi bi-file-text text-success"></i> <strong id="aiTokensUsed">0</strong> tokens</span>
+                            <span><i class="bi bi-currency-dollar text-primary"></i> <strong id="aiCostEstimate">$0.00</strong></span>
+                            <span><i class="bi bi-clock text-warning"></i> <strong id="aiAvgResponseTime">0s</strong> avg</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Conditional Access Policies</h5>
+                        <button class="btn btn-primary btn-sm" onclick="refreshPolicies()">
+                            <i class="bi bi-arrow-clockwise"></i> Refresh
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <!-- Bulk Operations Controls -->
+                        <div id="bulkOperationsBar" class="alert alert-light border mb-3 d-none">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong id="selectedCount">0 policies selected</strong>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-danger btn-sm" onclick="bulkDeletePolicies()">
+                                        <i class="bi bi-trash"></i> Delete Selected
+                                    </button>
+                                    <button class="btn btn-outline-secondary btn-sm" onclick="selectAllPoliciesGlobal()">
+                                        <i class="bi bi-check-all"></i> Select All
+                                    </button>
+                                    <button class="btn btn-outline-secondary btn-sm" onclick="deselectAllPoliciesGlobal()">
+                                        <i class="bi bi-x-circle"></i> Deselect All
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="mt-2">
+                                <div id="bulkProgress" class="progress d-none" style="height: 20px;">
+                                    <div id="bulkProgressBar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"></div>
+                                </div>
+                                <div id="bulkStatus" class="mt-2"></div>
+                            </div>
+                        </div>
+                        
+                        <div id="policiesLoader" class="text-center d-none">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="policiesTable">
+                                <thead>
+                                    <tr>
+                                        <th><input type="checkbox" id="selectAllPolicies" onclick="toggleSelectAll()"></th>
+                                        <th class="sortable" onclick="sortPolicies('displayName')">
+                                            Display Name <i id="sort-displayName" class="bi bi-arrow-down-up"></i>
+                                        </th>
+                                        <th class="sortable" onclick="sortPolicies('state')">
+                                            State <i id="sort-state" class="bi bi-arrow-down-up"></i>
+                                        </th>
+                                        <th class="sortable" onclick="sortPolicies('createdDateTime')">
+                                            Created <i id="sort-createdDateTime" class="bi bi-arrow-down-up"></i>
+                                        </th>
+                                        <th class="sortable" onclick="sortPolicies('modifiedDateTime')">
+                                            Modified <i id="sort-modifiedDateTime" class="bi bi-arrow-down-up"></i>
+                                        </th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="policiesTableBody">
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted">Connect to Microsoft Graph to view policies</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Templates Tab -->
+            <div class="tab-pane fade" id="templates" role="tabpanel">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Policy Templates</h5>
+                        <div>
+                            <button class="btn btn-info btn-sm me-2" onclick="createCAGroups()" title="Create all required Azure AD groups before deploying policies">
+                                <i class="bi bi-people-fill"></i> Create Framework Groups
+                            </button>
+                            <button class="btn btn-success btn-sm" onclick="deployAllTemplates()">
+                                <i class="bi bi-download"></i> Deploy All Templates
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="templatesContainer" class="row">
+                            <!-- Templates will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Import Report Tab -->
+            <div class="tab-pane fade" id="report" role="tabpanel">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Import Security Assessment Report</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- File Upload -->
+                        <div class="mb-4">
+                            <label for="reportFile" class="form-label">Upload Report File (HTML)</label>
+                            <div class="input-group">
+                                <input type="file" class="form-control" id="reportFile" accept=".html">
+                                <button class="btn btn-primary" onclick="uploadReport()">
+                                    <i class="bi bi-upload"></i> Upload & Analyze
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Statistics -->
+                        <div id="reportStats" class="row mb-4 d-none">
+                            <div class="col-md-2">
+                                <div class="card text-center">
+                                    <div class="card-body">
+                                        <h3 class="mb-0" id="statTotal">0</h3>
+                                        <small class="text-muted">Total Findings</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="card text-center">
+                                    <div class="card-body">
+                                        <h3 class="mb-0 text-danger" id="statHigh">0</h3>
+                                        <small class="text-muted">High Severity</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="card text-center">
+                                    <div class="card-body">
+                                        <h3 class="mb-0 text-warning" id="statMedium">0</h3>
+                                        <small class="text-muted">Medium Severity</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="card text-center">
+                                    <div class="card-body">
+                                        <h3 class="mb-0 text-info" id="statLow">0</h3>
+                                        <small class="text-muted">Low Severity</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="card text-center">
+                                    <div class="card-body">
+                                        <h3 class="mb-0 text-danger" id="statFailed">0</h3>
+                                        <small class="text-muted">Failed</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="card text-center">
+                                    <div class="card-body">
+                                        <h3 class="mb-0 text-primary" id="statMapped">0</h3>
+                                        <small class="text-muted">Mapped Policies</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Findings and Recommendations -->
+                        <div id="reportResults" class="d-none">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h6 class="mb-0">Security Findings (Failed Only)</h6>
+                                        </div>
+                                        <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+                                            <div id="findingsList"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h6 class="mb-0">Policy Recommendations</h6>
+                                        </div>
+                                        <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+                                            <div id="recommendationsList"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Actions -->
+                            <div class="mt-3 d-flex gap-2">
+                                <button class="btn btn-success" onclick="deploySelectedRecommendations()">
+                                    <i class="bi bi-check-circle"></i> Deploy Selected Recommendations
+                                </button>
+                                <button class="btn btn-primary" onclick="deployAllRecommendations()">
+                                    <i class="bi bi-download"></i> Deploy All Recommendations
+                                </button>
+                                <button class="btn btn-secondary" onclick="exportFindings()">
+                                    <i class="bi bi-file-earmark-excel"></i> Export to Excel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Named Locations Tab -->
+            <div class="tab-pane fade" id="named-locations" role="tabpanel">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Conditional Access Named Locations</h5>
+                        <button class="btn btn-primary btn-sm" onclick="loadNamedLocations()">
+                            <i class="bi bi-arrow-clockwise"></i> Refresh
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div id="namedLocationsContainer">
+                            <div class="text-center text-muted py-4">
+                                <p>Click Refresh to load named locations</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Azure Portal Links Tab -->
+            <div class="tab-pane fade" id="azure-portal" role="tabpanel">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="bi bi-microsoft"></i> Azure Portal Quick Links</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> <strong>Note:</strong> These links will open in a new browser tab using your current Azure session.
+                        </div>
+
+                        <!-- Primary Link - Insights & Reporting -->
+                        <div class="card mb-3 border-primary">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h5 class="card-title">
+                                            <i class="bi bi-graph-up text-primary"></i> Conditional Access Insights & Reporting
+                                        </h5>
+                                        <p class="card-text text-muted">
+                                            View comprehensive insights, sign-in logs, and reporting data for your Conditional Access policies.
+                                            Analyze policy effectiveness and troubleshoot access issues.
+                                        </p>
+                                        <ul class="small text-muted mb-0">
+                                            <li>Sign-in log analysis with policy details</li>
+                                            <li>Policy impact visualization</li>
+                                            <li>User risk and sign-in risk data</li>
+                                            <li>What If tool for testing policy scenarios</li>
+                                        </ul>
+                                    </div>
+                                    <div class="ms-3">
+                                        <a href="https://portal.azure.com/#view/Microsoft_AAD_ConditionalAccess/ConditionalAccessBlade/~/InsightsAndReporting" 
+                                           target="_blank" 
+                                           class="btn btn-primary btn-lg">
+                                            <i class="bi bi-box-arrow-up-right"></i> Open
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Additional Portal Links -->
+                        <h6 class="mt-4 mb-3">Other Conditional Access Resources</h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <h6 class="card-title">
+                                            <i class="bi bi-shield-lock text-primary"></i> Conditional Access Policies
+                                        </h6>
+                                        <p class="card-text small text-muted">
+                                            View and manage all Conditional Access policies in the Azure Portal.
+                                        </p>
+                                        <a href="https://portal.azure.com/#view/Microsoft_AAD_ConditionalAccess/ConditionalAccessBlade/~/Policies" 
+                                           target="_blank" 
+                                           class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-box-arrow-up-right"></i> Open
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <h6 class="card-title">
+                                            <i class="bi bi-geo-alt text-success"></i> Named Locations
+                                        </h6>
+                                        <p class="card-text small text-muted">
+                                            Configure trusted IP ranges and geographic locations.
+                                        </p>
+                                        <a href="https://portal.azure.com/#view/Microsoft_AAD_ConditionalAccess/ConditionalAccessBlade/~/NamedLocations" 
+                                           target="_blank" 
+                                           class="btn btn-sm btn-outline-success">
+                                            <i class="bi bi-box-arrow-up-right"></i> Open
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <h6 class="card-title">
+                                            <i class="bi bi-file-earmark-text text-info"></i> Sign-in Logs
+                                        </h6>
+                                        <p class="card-text small text-muted">
+                                            Review detailed sign-in activity and authentication logs.
+                                        </p>
+                                        <a href="https://portal.azure.com/#view/Microsoft_AAD_IAM/ActiveDirectoryMenuBlade/~/SignIns" 
+                                           target="_blank" 
+                                           class="btn btn-sm btn-outline-info">
+                                            <i class="bi bi-box-arrow-up-right"></i> Open
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <h6 class="card-title">
+                                            <i class="bi bi-question-circle text-warning"></i> What If Tool
+                                        </h6>
+                                        <p class="card-text small text-muted">
+                                            Test how policies apply to specific users and scenarios.
+                                        </p>
+                                        <a href="https://portal.azure.com/#view/Microsoft_AAD_ConditionalAccess/WhatIf.ReactView" 
+                                           target="_blank" 
+                                           class="btn btn-sm btn-outline-warning">
+                                            <i class="bi bi-box-arrow-up-right"></i> Open
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <h6 class="card-title">
+                                            <i class="bi bi-exclamation-triangle text-danger"></i> Identity Protection
+                                        </h6>
+                                        <p class="card-text small text-muted">
+                                            Monitor and respond to identity risks and vulnerabilities.
+                                        </p>
+                                        <a href="https://portal.azure.com/#view/Microsoft_AAD_IAM/SecurityMenuBlade/~/RiskDetections" 
+                                           target="_blank" 
+                                           class="btn btn-sm btn-outline-danger">
+                                            <i class="bi bi-box-arrow-up-right"></i> Open
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <h6 class="card-title">
+                                            <i class="bi bi-gear text-secondary"></i> Authentication Methods
+                                        </h6>
+                                        <p class="card-text small text-muted">
+                                            Configure MFA and authentication method policies.
+                                        </p>
+                                        <a href="https://portal.azure.com/#view/Microsoft_AAD_IAM/AuthenticationMethodsMenuBlade/~/AdminAuthMethods" 
+                                           target="_blank" 
+                                           class="btn btn-sm btn-outline-secondary">
+                                            <i class="bi bi-box-arrow-up-right"></i> Open
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Tips -->
+                        <div class="alert alert-light border mt-4">
+                            <h6><i class="bi bi-lightbulb"></i> Quick Tips</h6>
+                            <ul class="small mb-0">
+                                <li><strong>Insights & Reporting:</strong> Use the date range filter to analyze policy effectiveness over specific time periods</li>
+                                <li><strong>What If Tool:</strong> Test policy changes before deploying them to production</li>
+                                <li><strong>Sign-in Logs:</strong> Filter by Conditional Access status to troubleshoot policy issues</li>
+                                <li><strong>Named Locations:</strong> Keep IP ranges updated to ensure accurate location-based policies</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>
+
+    <!-- Connect Modal -->
+    <div class="modal fade" id="connectModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Connect to Microsoft Graph</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Authentication Method Selection -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card h-100 auth-method-card" onclick="showClientCredsAuth()">
+                                <div class="card-body text-center">
+                                    <i class="bi bi-key-fill text-primary" style="font-size: 3rem;"></i>
+                                    <h5 class="mt-3">App Credentials</h5>
+                                    <p class="text-muted small">Use Client ID and Secret</p>
+                                    <ul class="text-start small">
+                                        <li>Service-to-service authentication</li>
+                                        <li>Requires app registration</li>
+                                        <li>Good for automation</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card h-100 auth-method-card" onclick="signInWithEntraID()">
+                                <div class="card-body text-center">
+                                    <i class="bi bi-person-circle text-success" style="font-size: 3rem;"></i>
+                                    <h5 class="mt-3">Sign In with Entra ID</h5>
+                                    <p class="text-muted small">Use your Microsoft 365 account</p>
+                                    <ul class="text-start small">
+                                        <li>Real-time policy data</li>
+                                        <li>Automatic policy discovery</li>
+                                        <li>Sign in with your account</li>
+                                    </ul>
+                                    <button class="btn btn-success btn-sm mt-2" onclick="event.stopPropagation(); signInWithEntraID();">
+                                        <i class="bi bi-box-arrow-in-right"></i> Sign In
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Client Credentials Form (Hidden by default) -->
+                    <div id="clientCredsForm" style="display: none;">
+                        <hr>
+                        <h6 class="mb-3">Enter App Registration Credentials</h6>
+                        <form id="connectForm">
+                            <div class="mb-3">
+                                <label for="tenantId" class="form-label">Tenant ID</label>
+                                <input type="text" class="form-control" id="tenantId" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="clientId" class="form-label">Client ID</label>
+                                <input type="text" class="form-control" id="clientId" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="clientSecret" class="form-label">Client Secret</label>
+                                <input type="password" class="form-control" id="clientSecret" required>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="verifySsl">
+                                <label class="form-check-label" for="verifySsl">
+                                    Verify SSL Certificate (uncheck if behind corporate proxy)
+                                </label>
+                            </div>
+                            <div class="mt-3">
+                                <button type="button" class="btn btn-secondary" onclick="hideClientCredsAuth()">Back</button>
+                                <button type="button" class="btn btn-primary" onclick="connect()">Connect</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Policy Details Modal -->
+    <div class="modal fade" id="policyModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="policyModalTitle">Policy Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <pre id="policyModalContent" style="max-height: 500px; overflow-y: auto;"></pre>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Progress Modal -->
+    <div class="modal fade" id="progressModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="progressModalTitle">Processing...</h5>
+                </div>
+                <div class="modal-body">
+                    <div class="progress mb-3" style="height: 25px;">
+                        <div id="progressModalBar" class="progress-bar progress-bar-striped progress-bar-animated" 
+                             role="progressbar" style="width: 0%">0%</div>
+                    </div>
+                    <div class="bg-dark text-light p-3 rounded" 
+                         style="max-height: 400px; overflow-y: auto; font-family: monospace; font-size: 0.85rem;" 
+                         id="progressModalConsole"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="progressModalClose" disabled>Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="liveToast" class="toast" role="alert">
+            <div class="toast-header">
+                <strong class="me-auto">Notification</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body" id="toastBody"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

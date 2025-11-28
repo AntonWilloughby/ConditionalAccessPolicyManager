@@ -1,0 +1,116 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/workbook.json#",
+  "contentVersion": "1.0.0.0",
+  "items": [
+    {
+      "type": "query",
+      "name": "KPIs",
+      "metadata": {
+        "displayName": "CA - KPIs (Last period)"
+      },
+      "settings": {
+        "query": {
+          "version": 1,
+          "query": "let period = {TimeRange:default=24h};\nEntraIdSignInEvents\n| where Timestamp > ago(period)\n| summarize Blocked = countif(ConditionalAccessStatus == 2), Allowed = countif(ConditionalAccessStatus == 1), NotApplied = countif(ConditionalAccessStatus == 0), Total = count()"
+        },
+        "visualization": {
+          "type": "kpis"
+        }
+      }
+    },
+    {
+      "type": "query",
+      "name": "Trend",
+      "metadata": {
+        "displayName": "Blocks vs Allows Over Time"
+      },
+      "settings": {
+        "query": {
+          "version": 1,
+          "query": "let period = {TimeRange:default=24h};\nEntraIdSignInEvents\n| where Timestamp > ago(period)\n| extend Status = case(ConditionalAccessStatus == 2, \"Blocked\", ConditionalAccessStatus == 1, \"Allowed\", \"NotApplied\")\n| summarize Count = count() by bin(Timestamp, 1h), Status\n| order by Timestamp asc"
+        },
+        "visualization": {
+          "type": "timechart",
+          "properties": { "legend": true }
+        }
+      }
+    },
+    {
+      "type": "query",
+      "name": "TopBlockedUsers",
+      "metadata": { "displayName": "Top Blocked Users (30d)" },
+      "settings": {
+        "query": { "version": 1, "query": "let period = 30d;\nEntraIdSignInEvents\n| where Timestamp > ago(period)\n| where ConditionalAccessStatus == 2\n| summarize Blocks = count() by AccountUpn\n| top 20 by Blocks desc" },
+        "visualization": { "type": "barchart" }
+      }
+    },
+    {
+      "type": "query",
+      "name": "TopApps",
+      "metadata": { "displayName": "Applications Most Often Blocked (30d)" },
+      "settings": {
+        "query": { "version": 1, "query": "let period = 30d;\nEntraIdSignInEvents\n| where Timestamp > ago(period)\n| where ConditionalAccessStatus == 2\n| summarize Blocks = count() by Application\n| top 20 by Blocks desc" },
+        "visualization": { "type": "barchart" }
+      }
+    },
+    {
+      "type": "query",
+      "name": "BlockedCountries",
+      "metadata": { "displayName": "Blocked Sign-ins by Country (30d)" },
+      "settings": {
+        "query": { "version": 1, "query": "let period = 30d;\nEntraIdSignInEvents\n| where Timestamp > ago(period)\n| where ConditionalAccessStatus == 2\n| summarize Blocks = count() by Country\n| top 20 by Blocks desc" },
+        "visualization": { "type": "table" }
+      }
+    },
+    {
+      "type": "query",
+      "name": "PolicySummary",
+      "metadata": { "displayName": "Conditional Access Policy Performance Summary (30d)" },
+      "settings": {
+        "query": {
+          "version": 1,
+          "query": "let period = 30d;\nEntraIdSignInEvents\n| where Timestamp > ago(period)\n| extend CAPraw = tostring(ConditionalAccessPolicies)\n| extend CAPjson = parse_json(CAPraw)\n| extend CAParray = case(isarray(CAPjson), CAPjson, isarray(CAPjson.policies), CAPjson.policies, isarray(CAPjson.value), CAPjson.value, dynamic([]))\n| mv-expand Policy = CAParray\n| extend PolicyName = tostring(Policy.displayName), PolicyResult = tostring(Policy.result), GrantControls = tostring(Policy.grantControls), BlockedByPolicy = tolower(PolicyResult) == \"failure\" or tolower(GrantControls) contains \"block\"\n| summarize Blocks = countif(BlockedByPolicy), Success = countif(PolicyResult == \"success\"), NotApplied = countif(PolicyResult == \"notApplied\") by PolicyName\n| top 50 by Blocks desc"
+        },
+        "visualization": { "type": "table" }
+      }
+    },
+    {
+      "type": "query",
+      "name": "PolicyDrilldown",
+      "metadata": { "displayName": "Policy Drilldown" },
+      "settings": {
+        "parameters": [
+          { "name": "PolicyName", "type": "string", "defaultValue": "" }
+        ],
+        "query": {
+          "version": 1,
+          "query": "let SelectedPolicy = '{PolicyName}';\nlet period = 30d;\nEntraIdSignInEvents\n| where Timestamp > ago(period)\n| extend CAP = parse_json(tostring(ConditionalAccessPolicies))\n| extend A = case(isarray(CAP), CAP, isarray(CAP.policies), CAP.policies, dynamic([]))\n| mv-expand P = A\n| where tostring(P.displayName) == SelectedPolicy\n| extend PolicyResult = tostring(P.result), GrantControls = tostring(P.grantControls)\n| project Timestamp, AccountUpn, Application, IPAddress, PolicyResult, GrantControls, AuthenticationRequirement, Country, City\n| sort by Timestamp desc"
+        },
+        "visualization": { "type": "table" }
+      }
+    },
+    {
+      "type": "query",
+      "name": "RawEvents",
+      "metadata": { "displayName": "Raw Events (7d)" },
+      "settings": {
+        "query": { "version": 1, "query": "EntraIdSignInEvents\n| where Timestamp > ago(7d)\n| extend CAStatusText = case(ConditionalAccessStatus == 2, \"Blocked\", ConditionalAccessStatus == 1, \"Allowed\", \"NotApplied\")\n| project Timestamp, AccountUpn, AccountDisplayName, IPAddress, Country, Application, CAStatusText, ConditionalAccessPolicies, AuthenticationRequirement, ErrorCode, CorrelationId\n| sort by Timestamp desc" },
+        "visualization": { "type": "table" }
+      }
+    }
+  ],
+  "parameters": [
+    {
+      "name": "TimeRange",
+      "type": "timeRange",
+      "defaultValue": "24h",
+      "displayName": "Time range"
+    },
+    {
+      "name": "PolicyName",
+      "type": "string",
+      "defaultValue": "",
+      "displayName": "Policy Name (for drilldown)"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+<step title="BackgroundTrace" date="2025-11-27T14:52:13.261" instance="064691" url="/api/zipdeploy" method="POST" >
+  <step title="Cleanup Xml Logs" date="2025-11-27T14:52:13.371" /><!-- duration: 163ms -->
+  <step title="Creating temporary deployment - FetchDeploymentManager" date="2025-11-27T14:52:16.773" /><!-- duration: 48ms -->
+  <step title="Creating temporary deployment" date="2025-11-27T14:52:16.843" /><!-- duration: 1496ms -->
+  <step title="Performing fetch based deployment" date="2025-11-27T14:52:20.616" >
+    <step title="Cleaning up temp folders from previous zip deployments and extracting pushed zip file /tmp/zipdeploy/602ce8b6-0490-4955-abc9-9cd16f421002.zip (27.10 MB) to /tmp/zipdeploy/extracted" date="2025-11-27T14:52:23.508" >
+      <step title="ChmodRecursive Process exited with total time taken in ms: 295" date="2025-11-27T14:53:41.355" /><!-- duration: 30ms -->
+    </step><!-- duration: 78007ms -->
+    <step title="Deployment timer started" date="2025-11-27T14:53:43.865" >
+      <step title="DeploymentManager.Deploy(id:a16ca79e-6b0d-4a24-8a03-f0e1a3a772ae)" date="2025-11-27T14:53:43.893" >
+        <step title="Collecting changeset information" date="2025-11-27T14:53:44.006" /><!-- duration: 1331ms -->
+        <step title="Updating submodules" date="2025-11-27T14:53:45.408" /><!-- duration: 1750ms -->
+        <step title="Determining deployment builder" date="2025-11-27T14:53:48.054" >
+          <step title="Builder is OryxBuilder" date="2025-11-27T14:53:48.233" /><!-- duration: 21ms -->
+        </step><!-- duration: 209ms -->
+        <step title="PreDeployment: context.CleanOutputPath False" date="2025-11-27T14:53:48.639" >
+          <step title="PreDeployment: context.OutputPath /home/site/wwwroot" date="2025-11-27T14:53:49.109" >
+            <step title="Building" date="2025-11-27T14:53:49.902" >
+              <step title="Executing external process" date="2025-11-27T14:53:51.701" type="process" path="bash" arguments="-c &quot;oryx build /tmp/zipdeploy/extracted -o /home/site/wwwroot --platform python --platform-version 3.12 -p virtualenv_name=antenv --log-file /tmp/build-debug.log  -i /tmp/8de2dc4c572ebff --compress-destination-dir | tee /tmp/oryx-build.log ; exit $PIPESTATUS &quot;" >
+                <step title="Cpu: rsync(879,1.380s)+rsync(878,0.340s)+rsync(877,1.740s)+build.sh(873,0.010s)+oryx(842,9.560s)+tee(843,0.000s)+bash(841,0.000s)=total(13.020s)" date="2025-11-27T14:55:46.159" /><!-- duration: 28ms -->
+                <step title="bash: no io activity for 61s, prev-cpu=-1.000s, current-cpu=13.020s" date="2025-11-27T14:55:46.209" /><!-- duration: 10ms -->

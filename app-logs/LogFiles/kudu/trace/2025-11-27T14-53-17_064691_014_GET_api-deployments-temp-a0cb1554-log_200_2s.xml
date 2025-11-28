@@ -1,0 +1,7 @@
+<step title="Incoming Request" date="2025-11-27T14:53:17.093" instance="064691" url="/api/deployments/temp-a0cb1554/log" method="GET" type="request" pid="778,1,5" Host="my-ca-manager-01.scm.azurewebsites.net" User-Agent="vscode-azureappservice/0.26.4 core-rest-pipeline/1.20.0 Node/22.20.0 OS/(x64-Windows_NT-10.0.22631)" Accept-Encoding="gzip,deflate" Accept-Language="en" Authorization="Bea..." x-ms-correlation-request-id="2bd71505-f8ca-4bde-8e2b-86bd6e7a236a" x-ms-client-request-id="47384ad6-b098-4473-b2e3-30a1f4beb490" X-ARR-LOG-ID="47384ad6-b098-4473-b2e3-30a1f4beb490" CLIENT-IP="142.127.161.137:64943" X-SITE-DEPLOYMENT-ID="my-ca-manager-01" WAS-DEFAULT-HOSTNAME="my-ca-manager-01.scm.azurewebsites.net" X-Forwarded-Proto="https" X-AppService-Proto="https" X-Forwarded-TlsVersion="1.3" X-WAWS-Unencoded-URL="/api/deployments/temp-a0cb1554/log" X-Client-IP="142.127.161.137" X-Client-Port="64943" >
+  <step title="Cleanup Xml Logs" date="2025-11-27T14:53:17.245" /><!-- duration: 290ms -->
+  <step title="DeploymentService.GetLogEntry" date="2025-11-27T14:53:18.060" >
+    <step title="DeploymentManager.GetLogEntries(id:temp-a0cb1554)" date="2025-11-27T14:53:18.259" /><!-- duration: 474ms -->
+  </step><!-- duration: 1055ms -->
+  <step title="Outgoing response" date="2025-11-27T14:53:19.186" type="response" statusCode="200" statusText="OK" /><!-- duration: 241ms -->
+</step><!-- duration: 2346ms -->

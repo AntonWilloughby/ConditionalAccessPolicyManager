@@ -1,0 +1,36 @@
+<step title="BackgroundTrace" date="2025-11-27T14:40:04.700" instance="064691" url="/api/zipdeploy" method="POST" >
+  <step title="Cleanup Xml Logs" date="2025-11-27T14:40:04.710" /><!-- duration: 40ms -->
+  <step title="Creating temporary deployment - FetchDeploymentManager" date="2025-11-27T14:40:05.091" /><!-- duration: 22ms -->
+  <step title="Creating temporary deployment" date="2025-11-27T14:40:05.142" /><!-- duration: 332ms -->
+  <step title="Performing fetch based deployment" date="2025-11-27T14:40:05.835" >
+    <step title="Cleaning up temp folders from previous zip deployments and extracting pushed zip file /tmp/zipdeploy/3eccba78-959c-4bb1-8882-d5eb54f9342a.zip (27.10 MB) to /tmp/zipdeploy/extracted" date="2025-11-27T14:40:07.082" >
+      <step title="ChmodRecursive Process exited with total time taken in ms: 393" date="2025-11-27T14:40:14.890" /><!-- duration: 3ms -->
+    </step><!-- duration: 7821ms -->
+    <step title="Deployment timer started" date="2025-11-27T14:40:16.928" >
+      <step title="DeploymentManager.Deploy(id:1b5efa8b-ab91-4582-bd63-a3f41f02c09b)" date="2025-11-27T14:40:16.939" >
+        <step title="Collecting changeset information" date="2025-11-27T14:40:16.978" /><!-- duration: 102ms -->
+        <step title="Updating submodules" date="2025-11-27T14:40:17.085" /><!-- duration: 1135ms -->
+        <step title="Determining deployment builder" date="2025-11-27T14:40:18.429" >
+          <step title="Builder is OryxBuilder" date="2025-11-27T14:40:18.463" /><!-- duration: 3ms -->
+        </step><!-- duration: 40ms -->
+        <step title="PreDeployment: context.CleanOutputPath False" date="2025-11-27T14:40:18.530" >
+          <step title="PreDeployment: context.OutputPath /home/site/wwwroot" date="2025-11-27T14:40:18.638" >
+            <step title="Building" date="2025-11-27T14:40:18.814" >
+              <step title="Executing external process" date="2025-11-27T14:40:19.249" type="process" path="bash" arguments="-c &quot;oryx build /tmp/zipdeploy/extracted -o /home/site/wwwroot --platform python --platform-version 3.12 -p virtualenv_name=antenv --log-file /tmp/build-debug.log  -i /tmp/8de2dc2e2c6ff0f --compress-destination-dir | tee /tmp/oryx-build.log ; exit $PIPESTATUS &quot;" >
+                <step title="Cpu: python(1141,30.840s)+ts(1142,0.150s)+build.sh(1140,0.000s)+build.sh(1139,0.000s)+build.sh(1007,0.070s)+oryx(989,4.750s)+tee(990,0.010s)+bash(988,0.000s)=total(35.810s)" date="2025-11-27T14:42:55.626" /><!-- duration: 22ms -->
+                <step title="bash: no io activity for 61s, prev-cpu=-1.000s, current-cpu=35.810s" date="2025-11-27T14:42:55.677" /><!-- duration: 10ms -->
+              </step><!-- duration: 221816ms -->
+              <step title="Using PythonDeploymentLogParser" date="2025-11-27T14:44:01.994" /><!-- duration: 11ms -->
+              <step title="Triggering recycle (preview mode disabled)." date="2025-11-27T14:44:04.116" /><!-- duration: 62ms -->
+              <step title="Modified file to trigger a restart of the app container." date="2025-11-27T14:44:04.279" /><!-- duration: 4ms -->
+              <step title="Skip function trigger and logicapp sync because function is not enabled." date="2025-11-27T14:44:04.468" /><!-- duration: 10ms -->
+            </step><!-- duration: 226529ms -->
+          </step><!-- duration: 226710ms -->
+          <step title="Cleaning up temp files" date="2025-11-27T14:44:05.349" /><!-- duration: 6778ms -->
+          <step title="Cleaning up temp files" date="2025-11-27T14:44:12.133" /><!-- duration: 515ms -->
+          <step title="Reloading status file with latest updates" date="2025-11-27T14:44:12.801" >
+            <step title="WebHooksManager.PublishEventAsync: PostDeployment" date="2025-11-27T14:44:12.909" /><!-- duration: 557ms -->
+          </step><!-- duration: 675ms -->
+          <step title="Cleaning up temporary deployment - fetch deployment was successful" date="2025-11-27T14:44:13.583" /><!-- duration: 11ms -->
+        </step><!-- duration: 235187ms -->
+      </step><!-- duration: 236857ms -->

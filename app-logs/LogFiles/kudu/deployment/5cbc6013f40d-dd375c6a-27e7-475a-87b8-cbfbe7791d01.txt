@@ -1,0 +1,249 @@
+2025-11-27T18:09:26  Fetching changes.
+2025-11-27T18:09:26    Starting  LocalZipHandler
+2025-11-27T18:09:26    Cleaning up temp folders from previous zip deployments and extracting pushed zip file /tmp/zipdeploy/2dd59949-8885-46cf-8d78-9dca17e097e4.zip (27.10 MB) to /tmp/zipdeploy/extracted
+2025-11-27T18:09:40  Updating submodules.
+2025-11-27T18:09:41  Preparing deployment for commit id 'da456e9e-2'.
+2025-11-27T18:09:41  PreDeployment: context.CleanOutputPath False
+2025-11-27T18:09:41  PreDeployment: context.OutputPath /home/site/wwwroot
+2025-11-27T18:09:41  Repository path is /tmp/zipdeploy/extracted
+2025-11-27T18:09:41  Running oryx build...
+2025-11-27T18:09:41    Command: oryx build /tmp/zipdeploy/extracted -o /home/site/wwwroot --platform python --platform-version 3.12 -p virtualenv_name=antenv --log-file /tmp/build-debug.log  -i /tmp/8de2de022bc48e2 --compress-destination-dir | tee /tmp/oryx-build.log
+2025-11-27T18:09:45    Operation performed by Microsoft Oryx, https://github.com/Microsoft/Oryx
+2025-11-27T18:09:45    You can report issues at https://github.com/Microsoft/Oryx/issues
+2025-11-27T18:09:45    
+2025-11-27T18:09:45    Oryx Version: 0.2.20251022.1+bef98bc7139feefaa74be16de9d835e2c85385d4, Commit: bef98bc7139feefaa74be16de9d835e2c85385d4, ReleaseTagName: 20251022.1
+2025-11-27T18:09:45    
+2025-11-27T18:09:45    Build Operation ID: 522a29cdbc30d211
+2025-11-27T18:09:45    Repository Commit : da456e9e-225c-4df4-a0fb-21c67f5a67cc
+2025-11-27T18:09:45    OS Type           : bullseye
+2025-11-27T18:09:45    Image Type        : githubactions
+2025-11-27T18:09:45    
+2025-11-27T18:09:45    Primary SDK Storage URL: https://oryx-cdn.microsoft.io
+2025-11-27T18:09:45    Backup SDK Storage URL: 
+2025-11-27T18:09:45    Detecting platforms...
+2025-11-27T18:09:45    External SDK provider is enabled.
+2025-11-27T18:09:45    Requesting metadata for platform python from external SDK provider
+2025-11-27T18:09:48    Requesting metadata for platform python from external SDK provider
+2025-11-27T18:09:50    Detected following platforms:
+2025-11-27T18:09:50      python: 3.12.12
+2025-11-27T18:09:50    Requesting metadata for platform python from external SDK provider
+2025-11-27T18:09:52    Version '3.12.12' of platform 'python' is not installed. Generating script to install it...
+2025-11-27T18:09:53    
+2025-11-27T18:09:53    Using intermediate directory '/tmp/8de2de022bc48e2'.
+2025-11-27T18:09:54    
+2025-11-27T18:09:54    Copying files to the intermediate directory...
+2025-11-27T18:10:07    Done in 13 sec(s).
+2025-11-27T18:10:07    
+2025-11-27T18:10:07    Source directory     : /tmp/8de2de022bc48e2
+2025-11-27T18:10:07    Destination directory: /home/site/wwwroot
+2025-11-27T18:10:07    
+2025-11-27T18:10:07    
+2025-11-27T18:10:07    Downloading and extracting 'python' version '3.12.12' to '/tmp/oryx/platforms/python/3.12.12'...
+2025-11-27T18:10:07    Detected image debian flavor: bullseye.
+2025-11-27T18:10:07    Skipping download of python version 3.12.12 as it is available in external sdk provider cache...
+2025-11-27T18:10:07    Extracting contents...
+2025-11-27T18:10:27    Successfully extracted python version 3.12.12 from external sdk provider cache...
+2025-11-27T18:10:27    Done in 19 sec(s).
+2025-11-27T18:10:27    
+2025-11-27T18:10:27    image detector file exists, platform is python..
+2025-11-27T18:10:27    OS detector file exists, OS is bullseye..
+2025-11-27T18:10:28    Python Version: /tmp/oryx/platforms/python/3.12.12/bin/python3.12
+2025-11-27T18:10:28    Creating directory for command manifest file if it does not exist
+2025-11-27T18:10:28    Removing existing manifest file
+2025-11-27T18:10:28    Python Virtual Environment: antenv
+2025-11-27T18:10:28    Creating virtual environment...
+2025-11-27T18:10:28    Executing: /tmp/oryx/platforms/python/3.12.12/bin/python3.12 -m venv antenv --copies --system-site-packages
+2025-11-27T18:10:40    Activating virtual environment...
+2025-11-27T18:10:40    Running pip install...
+2025-11-27T18:11:30    [18:10:42+0000] Collecting flask==3.0.0 (from -r requirements.txt (line 1))
+2025-11-27T18:11:30    [18:10:42+0000]   Downloading flask-3.0.0-py3-none-any.whl.metadata (3.6 kB)
+2025-11-27T18:11:30    [18:10:42+0000] Collecting werkzeug==3.0.1 (from -r requirements.txt (line 2))
+2025-11-27T18:11:31    [18:10:42+0000]   Downloading werkzeug-3.0.1-py3-none-any.whl.metadata (4.1 kB)
+2025-11-27T18:11:31    [18:10:42+0000] Collecting msal==1.25.0 (from -r requirements.txt (line 3))
+2025-11-27T18:11:31    [18:10:42+0000]   Downloading msal-1.25.0-py2.py3-none-any.whl.metadata (11 kB)
+2025-11-27T18:11:31    [18:10:43+0000] Collecting requests==2.31.0 (from -r requirements.txt (line 4))
+2025-11-27T18:11:31    [18:10:43+0000]   Downloading requests-2.31.0-py3-none-any.whl.metadata (4.6 kB)
+2025-11-27T18:11:31    [18:10:44+0000] Collecting beautifulsoup4==4.12.2 (from -r requirements.txt (line 5))
+2025-11-27T18:11:31    [18:10:44+0000]   Downloading beautifulsoup4-4.12.2-py3-none-any.whl.metadata (3.6 kB)
+2025-11-27T18:11:31    [18:10:44+0000] Collecting openpyxl==3.1.5 (from -r requirements.txt (line 6))
+2025-11-27T18:11:31    [18:10:44+0000]   Downloading openpyxl-3.1.5-py2.py3-none-any.whl.metadata (2.5 kB)
+2025-11-27T18:11:31    [18:10:44+0000] Collecting urllib3==2.1.0 (from -r requirements.txt (line 7))
+2025-11-27T18:11:31    [18:10:44+0000]   Downloading urllib3-2.1.0-py3-none-any.whl.metadata (6.4 kB)
+2025-11-27T18:11:31    [18:10:44+0000] Collecting gunicorn==21.2.0 (from -r requirements.txt (line 8))
+2025-11-27T18:11:31    [18:10:44+0000]   Downloading gunicorn-21.2.0-py3-none-any.whl.metadata (4.1 kB)
+2025-11-27T18:11:31    [18:10:44+0000] Collecting python-dotenv==1.0.0 (from -r requirements.txt (line 9))
+2025-11-27T18:11:31    [18:10:44+0000]   Downloading python_dotenv-1.0.0-py3-none-any.whl.metadata (21 kB)
+2025-11-27T18:11:31    [18:10:45+0000] Collecting openai>=2.0.0 (from -r requirements.txt (line 10))
+2025-11-27T18:11:31    [18:10:45+0000]   Downloading openai-2.8.1-py3-none-any.whl.metadata (29 kB)
+2025-11-27T18:11:31    [18:10:45+0000] Collecting redis==5.0.0 (from -r requirements.txt (line 11))
+2025-11-27T18:11:31    [18:10:45+0000]   Downloading redis-5.0.0-py3-none-any.whl.metadata (8.8 kB)
+2025-11-27T18:11:31    [18:10:45+0000] Collecting flask-session==0.5.0 (from -r requirements.txt (line 12))
+2025-11-27T18:11:31    [18:10:45+0000]   Downloading flask_session-0.5.0-py3-none-any.whl.metadata (1.4 kB)
+2025-11-27T18:11:31    [18:10:45+0000] Collecting flask-limiter==3.5.0 (from -r requirements.txt (line 13))
+2025-11-27T18:11:31    [18:10:45+0000]   Downloading Flask_Limiter-3.5.0-py3-none-any.whl.metadata (6.3 kB)
+2025-11-27T18:11:31    [18:10:46+0000] Collecting flask-wtf==1.2.1 (from -r requirements.txt (line 14))
+2025-11-27T18:11:31    [18:10:46+0000]   Downloading flask_wtf-1.2.1-py3-none-any.whl.metadata (3.4 kB)
+2025-11-27T18:11:31    [18:10:46+0000] Collecting Jinja2>=3.1.2 (from flask==3.0.0->-r requirements.txt (line 1))
+2025-11-27T18:11:32    [18:10:46+0000]   Downloading jinja2-3.1.6-py3-none-any.whl.metadata (2.9 kB)
+2025-11-27T18:11:32    [18:10:46+0000] Collecting itsdangerous>=2.1.2 (from flask==3.0.0->-r requirements.txt (line 1))
+2025-11-27T18:11:32    [18:10:46+0000]   Downloading itsdangerous-2.2.0-py3-none-any.whl.metadata (1.9 kB)
+2025-11-27T18:11:32    [18:10:46+0000] Collecting click>=8.1.3 (from flask==3.0.0->-r requirements.txt (line 1))
+2025-11-27T18:11:32    [18:10:46+0000]   Downloading click-8.3.1-py3-none-any.whl.metadata (2.6 kB)
+2025-11-27T18:11:32    [18:10:47+0000] Collecting blinker>=1.6.2 (from flask==3.0.0->-r requirements.txt (line 1))
+2025-11-27T18:11:32    [18:10:47+0000]   Downloading blinker-1.9.0-py3-none-any.whl.metadata (1.6 kB)
+2025-11-27T18:11:32    [18:10:47+0000] Collecting MarkupSafe>=2.1.1 (from werkzeug==3.0.1->-r requirements.txt (line 2))
+2025-11-27T18:11:32    [18:10:47+0000]   Downloading markupsafe-3.0.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (2.7 kB)
+2025-11-27T18:11:32    [18:10:47+0000] Collecting PyJWT<3,>=1.0.0 (from PyJWT[crypto]<3,>=1.0.0->msal==1.25.0->-r requirements.txt (line 3))
+2025-11-27T18:11:32    [18:10:47+0000]   Downloading PyJWT-2.10.1-py3-none-any.whl.metadata (4.0 kB)
+2025-11-27T18:11:32    [18:10:48+0000] Collecting cryptography<44,>=0.6 (from msal==1.25.0->-r requirements.txt (line 3))
+2025-11-27T18:11:32    [18:10:48+0000]   Downloading cryptography-43.0.3-cp39-abi3-manylinux_2_28_x86_64.whl.metadata (5.4 kB)
+2025-11-27T18:11:32    [18:10:49+0000] Collecting charset-normalizer<4,>=2 (from requests==2.31.0->-r requirements.txt (line 4))
+2025-11-27T18:11:32    [18:10:49+0000]   Downloading charset_normalizer-3.4.4-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (37 kB)
+2025-11-27T18:11:32    [18:10:49+0000] Collecting idna<4,>=2.5 (from requests==2.31.0->-r requirements.txt (line 4))
+2025-11-27T18:11:32    [18:10:49+0000]   Downloading idna-3.11-py3-none-any.whl.metadata (8.4 kB)
+2025-11-27T18:11:32    [18:10:49+0000] Collecting certifi>=2017.4.17 (from requests==2.31.0->-r requirements.txt (line 4))
+2025-11-27T18:11:33    [18:10:50+0000]   Downloading certifi-2025.11.12-py3-none-any.whl.metadata (2.5 kB)
+2025-11-27T18:11:33    [18:10:50+0000] Collecting soupsieve>1.2 (from beautifulsoup4==4.12.2->-r requirements.txt (line 5))
+2025-11-27T18:11:33    [18:10:50+0000]   Downloading soupsieve-2.8-py3-none-any.whl.metadata (4.6 kB)
+2025-11-27T18:11:33    [18:10:50+0000] Collecting et-xmlfile (from openpyxl==3.1.5->-r requirements.txt (line 6))
+2025-11-27T18:11:33    [18:10:50+0000]   Downloading et_xmlfile-2.0.0-py3-none-any.whl.metadata (2.7 kB)
+2025-11-27T18:11:33    [18:10:50+0000] Collecting packaging (from gunicorn==21.2.0->-r requirements.txt (line 8))
+2025-11-27T18:11:33    [18:10:50+0000]   Downloading packaging-25.0-py3-none-any.whl.metadata (3.3 kB)
+2025-11-27T18:11:33    [18:10:50+0000] Collecting cachelib (from flask-session==0.5.0->-r requirements.txt (line 12))
+2025-11-27T18:11:33    [18:10:50+0000]   Downloading cachelib-0.13.0-py3-none-any.whl.metadata (2.0 kB)
+2025-11-27T18:11:33    [18:10:50+0000] Collecting limits>=2.8 (from flask-limiter==3.5.0->-r requirements.txt (line 13))
+2025-11-27T18:11:33    [18:10:50+0000]   Downloading limits-5.6.0-py3-none-any.whl.metadata (10 kB)
+2025-11-27T18:11:33    [18:10:50+0000] Collecting ordered-set<5,>4 (from flask-limiter==3.5.0->-r requirements.txt (line 13))
+2025-11-27T18:11:33    [18:10:50+0000]   Downloading ordered_set-4.1.0-py3-none-any.whl.metadata (5.3 kB)
+2025-11-27T18:11:33    [18:10:51+0000] Collecting rich<14,>=12 (from flask-limiter==3.5.0->-r requirements.txt (line 13))
+2025-11-27T18:11:33    [18:10:51+0000]   Downloading rich-13.9.4-py3-none-any.whl.metadata (18 kB)
+2025-11-27T18:11:33    [18:10:51+0000] Collecting typing-extensions>=4 (from flask-limiter==3.5.0->-r requirements.txt (line 13))
+2025-11-27T18:11:33    [18:10:51+0000]   Downloading typing_extensions-4.15.0-py3-none-any.whl.metadata (3.3 kB)
+2025-11-27T18:11:33    [18:10:51+0000] Collecting wtforms (from flask-wtf==1.2.1->-r requirements.txt (line 14))
+2025-11-27T18:11:33    [18:10:51+0000]   Downloading wtforms-3.2.1-py3-none-any.whl.metadata (5.3 kB)
+2025-11-27T18:11:33    [18:10:51+0000] Collecting anyio<5,>=3.5.0 (from openai>=2.0.0->-r requirements.txt (line 10))
+2025-11-27T18:11:33    [18:10:51+0000]   Downloading anyio-4.11.0-py3-none-any.whl.metadata (4.1 kB)
+2025-11-27T18:11:33    [18:10:51+0000] Collecting distro<2,>=1.7.0 (from openai>=2.0.0->-r requirements.txt (line 10))
+2025-11-27T18:11:33    [18:10:51+0000]   Downloading distro-1.9.0-py3-none-any.whl.metadata (6.8 kB)
+2025-11-27T18:11:33    [18:10:52+0000] Collecting httpx<1,>=0.23.0 (from openai>=2.0.0->-r requirements.txt (line 10))
+2025-11-27T18:11:33    [18:10:52+0000]   Downloading httpx-0.28.1-py3-none-any.whl.metadata (7.1 kB)
+2025-11-27T18:11:33    [18:10:52+0000] Collecting jiter<1,>=0.10.0 (from openai>=2.0.0->-r requirements.txt (line 10))
+2025-11-27T18:11:33    [18:10:52+0000]   Downloading jiter-0.12.0-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (5.2 kB)
+2025-11-27T18:11:34    [18:10:53+0000] Collecting pydantic<3,>=1.9.0 (from openai>=2.0.0->-r requirements.txt (line 10))
+2025-11-27T18:11:34    [18:10:53+0000]   Downloading pydantic-2.12.5-py3-none-any.whl.metadata (90 kB)
+2025-11-27T18:11:34    [18:10:53+0000] Collecting sniffio (from openai>=2.0.0->-r requirements.txt (line 10))
+2025-11-27T18:11:34    [18:10:53+0000]   Downloading sniffio-1.3.1-py3-none-any.whl.metadata (3.9 kB)
+2025-11-27T18:11:34    [18:10:53+0000] Collecting tqdm>4 (from openai>=2.0.0->-r requirements.txt (line 10))
+2025-11-27T18:11:34    [18:10:53+0000]   Downloading tqdm-4.67.1-py3-none-any.whl.metadata (57 kB)
+2025-11-27T18:11:34    [18:10:54+0000] Collecting cffi>=1.12 (from cryptography<44,>=0.6->msal==1.25.0->-r requirements.txt (line 3))
+2025-11-27T18:11:34    [18:10:54+0000]   Downloading cffi-2.0.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (2.6 kB)
+2025-11-27T18:11:34    [18:10:54+0000] Collecting httpcore==1.* (from httpx<1,>=0.23.0->openai>=2.0.0->-r requirements.txt (line 10))
+2025-11-27T18:11:34    [18:10:54+0000]   Downloading httpcore-1.0.9-py3-none-any.whl.metadata (21 kB)
+2025-11-27T18:11:34    [18:10:54+0000] Collecting h11>=0.16 (from httpcore==1.*->httpx<1,>=0.23.0->openai>=2.0.0->-r requirements.txt (line 10))
+2025-11-27T18:11:34    [18:10:54+0000]   Downloading h11-0.16.0-py3-none-any.whl.metadata (8.3 kB)
+2025-11-27T18:11:34    [18:10:54+0000] Collecting deprecated>=1.2 (from limits>=2.8->flask-limiter==3.5.0->-r requirements.txt (line 13))
+2025-11-27T18:11:34    [18:10:54+0000]   Downloading deprecated-1.3.1-py2.py3-none-any.whl.metadata (5.9 kB)
+2025-11-27T18:11:34    [18:10:54+0000] Collecting annotated-types>=0.6.0 (from pydantic<3,>=1.9.0->openai>=2.0.0->-r requirements.txt (line 10))
+2025-11-27T18:11:34    [18:10:54+0000]   Downloading annotated_types-0.7.0-py3-none-any.whl.metadata (15 kB)
+2025-11-27T18:11:34    [18:10:58+0000] Collecting pydantic-core==2.41.5 (from pydantic<3,>=1.9.0->openai>=2.0.0->-r requirements.txt (line 10))
+2025-11-27T18:11:34    [18:10:58+0000]   Downloading pydantic_core-2.41.5-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (7.3 kB)
+2025-11-27T18:11:34    [18:10:58+0000] Collecting typing-inspection>=0.4.2 (from pydantic<3,>=1.9.0->openai>=2.0.0->-r requirements.txt (line 10))
+2025-11-27T18:11:34    [18:10:58+0000]   Downloading typing_inspection-0.4.2-py3-none-any.whl.metadata (2.6 kB)
+2025-11-27T18:11:34    [18:10:58+0000] Collecting markdown-it-py>=2.2.0 (from rich<14,>=12->flask-limiter==3.5.0->-r requirements.txt (line 13))
+2025-11-27T18:11:34    [18:10:58+0000]   Downloading markdown_it_py-4.0.0-py3-none-any.whl.metadata (7.3 kB)
+2025-11-27T18:11:34    [18:10:58+0000] Collecting pygments<3.0.0,>=2.13.0 (from rich<14,>=12->flask-limiter==3.5.0->-r requirements.txt (line 13))
+2025-11-27T18:11:34    [18:10:58+0000]   Downloading pygments-2.19.2-py3-none-any.whl.metadata (2.5 kB)
+2025-11-27T18:11:34    [18:10:58+0000] Collecting pycparser (from cffi>=1.12->cryptography<44,>=0.6->msal==1.25.0->-r requirements.txt (line 3))
+2025-11-27T18:11:34    [18:10:58+0000]   Downloading pycparser-2.23-py3-none-any.whl.metadata (993 bytes)
+2025-11-27T18:11:35    [18:10:59+0000] Collecting wrapt<3,>=1.10 (from deprecated>=1.2->limits>=2.8->flask-limiter==3.5.0->-r requirements.txt (line 13))
+2025-11-27T18:11:35    [18:10:59+0000]   Downloading wrapt-2.0.1-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl.metadata (9.0 kB)
+2025-11-27T18:11:35    [18:10:59+0000] Collecting mdurl~=0.1 (from markdown-it-py>=2.2.0->rich<14,>=12->flask-limiter==3.5.0->-r requirements.txt (line 13))
+2025-11-27T18:11:35    [18:10:59+0000]   Downloading mdurl-0.1.2-py3-none-any.whl.metadata (1.6 kB)
+2025-11-27T18:11:35    [18:10:59+0000] Downloading flask-3.0.0-py3-none-any.whl (99 kB)
+2025-11-27T18:11:35    [18:10:59+0000] Downloading werkzeug-3.0.1-py3-none-any.whl (226 kB)
+2025-11-27T18:11:35    [18:10:59+0000] Downloading msal-1.25.0-py2.py3-none-any.whl (97 kB)
+2025-11-27T18:11:35    [18:10:59+0000] Downloading requests-2.31.0-py3-none-any.whl (62 kB)
+2025-11-27T18:11:35    [18:10:59+0000] Downloading beautifulsoup4-4.12.2-py3-none-any.whl (142 kB)
+2025-11-27T18:11:35    [18:10:59+0000] Downloading openpyxl-3.1.5-py2.py3-none-any.whl (250 kB)
+2025-11-27T18:11:35    [18:10:59+0000] Downloading urllib3-2.1.0-py3-none-any.whl (104 kB)
+2025-11-27T18:11:35    [18:11:00+0000] Downloading gunicorn-21.2.0-py3-none-any.whl (80 kB)
+2025-11-27T18:11:35    [18:11:00+0000] Downloading python_dotenv-1.0.0-py3-none-any.whl (19 kB)
+2025-11-27T18:11:35    [18:11:00+0000] Downloading redis-5.0.0-py3-none-any.whl (250 kB)
+2025-11-27T18:11:35    [18:11:00+0000] Downloading flask_session-0.5.0-py3-none-any.whl (7.2 kB)
+2025-11-27T18:11:35    [18:11:00+0000] Downloading Flask_Limiter-3.5.0-py3-none-any.whl (28 kB)
+2025-11-27T18:11:35    [18:11:00+0000] Downloading flask_wtf-1.2.1-py3-none-any.whl (12 kB)
+2025-11-27T18:11:35    [18:11:00+0000] Downloading openai-2.8.1-py3-none-any.whl (1.0 MB)
+2025-11-27T18:11:35    [18:11:00+0000]    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.0/1.0 MB 9.7 MB/s eta 0:00:00
+2025-11-27T18:11:35    [18:11:00+0000] Downloading anyio-4.11.0-py3-none-any.whl (109 kB)
+2025-11-27T18:11:35    [18:11:00+0000] Downloading blinker-1.9.0-py3-none-any.whl (8.5 kB)
+2025-11-27T18:11:35    [18:11:00+0000] Downloading certifi-2025.11.12-py3-none-any.whl (159 kB)
+2025-11-27T18:11:35    [18:11:00+0000] Downloading charset_normalizer-3.4.4-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (153 kB)
+2025-11-27T18:11:36    [18:11:00+0000] Downloading click-8.3.1-py3-none-any.whl (108 kB)
+2025-11-27T18:11:36    [18:11:00+0000] Downloading cryptography-43.0.3-cp39-abi3-manylinux_2_28_x86_64.whl (4.0 MB)
+2025-11-27T18:11:36    [18:11:01+0000]    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━��━━━━━━ 4.0/4.0 MB 23.3 MB/s eta 0:00:00
+2025-11-27T18:11:36    [18:11:01+0000] Downloading distro-1.9.0-py3-none-any.whl (20 kB)
+2025-11-27T18:11:36    [18:11:01+0000] Downloading httpx-0.28.1-py3-none-any.whl (73 kB)
+2025-11-27T18:11:36    [18:11:01+0000] Downloading httpcore-1.0.9-py3-none-any.whl (78 kB)
+2025-11-27T18:11:36    [18:11:02+0000] Downloading idna-3.11-py3-none-any.whl (71 kB)
+2025-11-27T18:11:36    [18:11:02+0000] Downloading itsdangerous-2.2.0-py3-none-any.whl (16 kB)
+2025-11-27T18:11:36    [18:11:02+0000] Downloading jinja2-3.1.6-py3-none-any.whl (134 kB)
+2025-11-27T18:11:36    [18:11:02+0000] Downloading jiter-0.12.0-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (361 kB)
+2025-11-27T18:11:36    [18:11:02+0000] Downloading limits-5.6.0-py3-none-any.whl (60 kB)
+2025-11-27T18:11:36    [18:11:02+0000] Downloading markupsafe-3.0.3-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (22 kB)
+2025-11-27T18:11:36    [18:11:02+0000] Downloading ordered_set-4.1.0-py3-none-any.whl (7.6 kB)
+2025-11-27T18:11:36    [18:11:02+0000] Downloading packaging-25.0-py3-none-any.whl (66 kB)
+2025-11-27T18:11:36    [18:11:02+0000] Downloading pydantic-2.12.5-py3-none-any.whl (463 kB)
+2025-11-27T18:11:36    [18:11:02+0000] Downloading pydantic_core-2.41.5-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (2.1 MB)
+2025-11-27T18:11:36    [18:11:02+0000]    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.1/2.1 MB 16.1 MB/s eta 0:00:00
+2025-11-27T18:11:36    [18:11:02+0000] Downloading PyJWT-2.10.1-py3-none-any.whl (22 kB)
+2025-11-27T18:11:36    [18:11:02+0000] Downloading rich-13.9.4-py3-none-any.whl (242 kB)
+2025-11-27T18:11:36    [18:11:03+0000] Downloading sniffio-1.3.1-py3-none-any.whl (10 kB)
+2025-11-27T18:11:36    [18:11:03+0000] Downloading soupsieve-2.8-py3-none-any.whl (36 kB)
+2025-11-27T18:11:36    [18:11:03+0000] Downloading tqdm-4.67.1-py3-none-any.whl (78 kB)
+2025-11-27T18:11:36    [18:11:03+0000] Downloading typing_extensions-4.15.0-py3-none-any.whl (44 kB)
+2025-11-27T18:11:36    [18:11:03+0000] Downloading cachelib-0.13.0-py3-none-any.whl (20 kB)
+2025-11-27T18:11:37    [18:11:03+0000] Downloading et_xmlfile-2.0.0-py3-none-any.whl (18 kB)
+2025-11-27T18:11:37    [18:11:03+0000] Downloading wtforms-3.2.1-py3-none-any.whl (152 kB)
+2025-11-27T18:11:37    [18:11:03+0000] Downloading annotated_types-0.7.0-py3-none-any.whl (13 kB)
+2025-11-27T18:11:37    [18:11:03+0000] Downloading cffi-2.0.0-cp312-cp312-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (219 kB)
+2025-11-27T18:11:37    [18:11:03+0000] Downloading deprecated-1.3.1-py2.py3-none-any.whl (11 kB)
+2025-11-27T18:11:37    [18:11:03+0000] Downloading markdown_it_py-4.0.0-py3-none-any.whl (87 kB)
+2025-11-27T18:11:37    [18:11:03+0000] Downloading pygments-2.19.2-py3-none-any.whl (1.2 MB)
+2025-11-27T18:11:37    [18:11:03+0000]    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.2/1.2 MB 15.1 MB/s eta 0:00:00
+2025-11-27T18:11:37    [18:11:03+0000] Downloading typing_inspection-0.4.2-py3-none-any.whl (14 kB)
+2025-11-27T18:11:37    [18:11:03+0000] Downloading h11-0.16.0-py3-none-any.whl (37 kB)
+2025-11-27T18:11:37    [18:11:03+0000] Downloading mdurl-0.1.2-py3-none-any.whl (10.0 kB)
+2025-11-27T18:11:37    [18:11:03+0000] Downloading wrapt-2.0.1-cp312-cp312-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (121 kB)
+2025-11-27T18:11:37    [18:11:03+0000] Downloading pycparser-2.23-py3-none-any.whl (118 kB)
+2025-11-27T18:11:37    [18:11:04+0000] Installing collected packages: wrapt, urllib3, typing-extensions, tqdm, soupsieve, sniffio, redis, python-dotenv, PyJWT, pygments, pycparser, packaging, ordered-set, mdurl, MarkupSafe, jiter, itsdangerous, idna, h11, et-xmlfile, distro, click, charset-normalizer, certifi, cachelib, blinker, annotated-types, wtforms, werkzeug, typing-inspection, requests, pydantic-core, openpyxl, markdown-it-py, Jinja2, httpcore, gunicorn, deprecated, cffi, beautifulsoup4, anyio, rich, pydantic, limits, httpx, flask, cryptography, openai, flask-wtf, flask-session, flask-limiter, msal
+2025-11-27T18:11:37    [18:11:29+0000] Successfully installed Jinja2-3.1.6 MarkupSafe-3.0.3 PyJWT-2.10.1 annotated-types-0.7.0 anyio-4.11.0 beautifulsoup4-4.12.2 blinker-1.9.0 cachelib-0.13.0 certifi-2025.11.12 cffi-2.0.0 charset-normalizer-3.4.4 click-8.3.1 cryptography-43.0.3 deprecated-1.3.1 distro-1.9.0 et-xmlfile-2.0.0 flask-3.0.0 flask-limiter-3.5.0 flask-session-0.5.0 flask-wtf-1.2.1 gunicorn-21.2.0 h11-0.16.0 httpcore-1.0.9 httpx-0.28.1 idna-3.11 itsdangerous-2.2.0 jiter-0.12.0 limits-5.6.0 markdown-it-py-4.0.0 mdurl-0.1.2 msal-1.25.0 openai-2.8.1 openpyxl-3.1.5 ordered-set-4.1.0 packaging-25.0 pycparser-2.23 pydantic-2.12.5 pydantic-core-2.41.5 pygments-2.19.2 python-dotenv-1.0.0 redis-5.0.0 requests-2.31.0 rich-13.9.4 sniffio-1.3.1 soupsieve-2.8 tqdm-4.67.1 typing-extensions-4.15.0 typing-inspection-0.4.2 urllib3-2.1.0 werkzeug-3.0.1 wrapt-2.0.1 wtforms-3.2.1
+2025-11-27T18:11:37    
+2025-11-27T18:11:37    [notice] A new release of pip is available: 25.0.1 -> 25.3
+2025-11-27T18:11:37    [notice] To update, run: pip install --upgrade pip
+2025-11-27T18:11:37    Not a vso image, so not writing build commands
+2025-11-27T18:11:37    Preparing output...
+2025-11-27T18:11:37    
+2025-11-27T18:11:37    Copying files to destination directory '/tmp/_preCompressedDestinationDir'...
+2025-11-27T18:11:55    Done in 24 sec(s).
+2025-11-27T18:11:55    Compressing content of directory '/tmp/_preCompressedDestinationDir'...
+2025-11-27T18:13:34    Copied the compressed output to '/home/site/wwwroot'
+2025-11-27T18:13:35    
+2025-11-27T18:13:35    Removing existing manifest file
+2025-11-27T18:13:35    Creating a manifest file...
+2025-11-27T18:13:35    Manifest file created.
+2025-11-27T18:13:35    Copying .ostype to manifest output directory.
+2025-11-27T18:13:35    
+2025-11-27T18:13:35    Done in 222 sec(s).
+2025-11-27T18:13:36  Running post deployment command(s)...
+2025-11-27T18:13:37  
+2025-11-27T18:13:37  Generating summary of Oryx build
+2025-11-27T18:13:37  Parsing the build logs
+2025-11-27T18:13:38  Found 0 issue(s)
+2025-11-27T18:13:38  
+2025-11-27T18:13:38  Build Summary :
+2025-11-27T18:13:38  ===============
+2025-11-27T18:13:38  Errors (0)
+2025-11-27T18:13:39  Warnings (0)
+2025-11-27T18:13:39  
+2025-11-27T18:13:39  Triggering container recycle for OneDeploy by adding/updating restartTrigger.txt to the site root path
+2025-11-27T18:13:40  Deployment successful. deployer = OneDeploy deploymentPath = OneDeploy

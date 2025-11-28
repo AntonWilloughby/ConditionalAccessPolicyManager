@@ -1,0 +1,40 @@
+<step title="BackgroundTrace" date="2025-11-27T15:05:56.994" instance="064691" url="/api/zipdeploy" method="POST" >
+  <step title="Cleanup Xml Logs" date="2025-11-27T15:05:57.025" /><!-- duration: 98ms -->
+  <step title="Creating temporary deployment - FetchDeploymentManager" date="2025-11-27T15:05:57.626" /><!-- duration: 41ms -->
+  <step title="Creating temporary deployment" date="2025-11-27T15:05:57.698" /><!-- duration: 168ms -->
+  <step title="Performing fetch based deployment" date="2025-11-27T15:05:58.293" >
+    <step title="Cleaning up temp folders from previous zip deployments and extracting pushed zip file /tmp/zipdeploy/92483eb7-2cd4-4afe-87ef-a8135635b89b.zip (27.10 MB) to /tmp/zipdeploy/extracted" date="2025-11-27T15:05:59.863" >
+      <step title="ChmodRecursive Process exited with total time taken in ms: 973" date="2025-11-27T15:06:12.310" /><!-- duration: 41ms -->
+    </step><!-- duration: 12515ms -->
+    <step title="Deployment timer started" date="2025-11-27T15:06:14.447" >
+      <step title="DeploymentManager.Deploy(id:66127398-a263-41a1-a09b-b0bd66e74f5d)" date="2025-11-27T15:06:14.479" >
+        <step title="Collecting changeset information" date="2025-11-27T15:06:14.537" /><!-- duration: 456ms -->
+        <step title="Updating submodules" date="2025-11-27T15:06:15.041" /><!-- duration: 1231ms -->
+        <step title="Determining deployment builder" date="2025-11-27T15:06:16.647" >
+          <step title="Builder is OryxBuilder" date="2025-11-27T15:06:16.741" /><!-- duration: 4ms -->
+        </step><!-- duration: 101ms -->
+        <step title="PreDeployment: context.CleanOutputPath False" date="2025-11-27T15:06:16.863" >
+          <step title="PreDeployment: context.OutputPath /home/site/wwwroot" date="2025-11-27T15:06:17.054" >
+            <step title="Building" date="2025-11-27T15:06:17.931" >
+              <step title="Executing external process" date="2025-11-27T15:06:18.705" type="process" path="bash" arguments="-c &quot;oryx build /tmp/zipdeploy/extracted -o /home/site/wwwroot --platform python --platform-version 3.12 -p virtualenv_name=antenv --log-file /tmp/build-debug.log  -i /tmp/8de2dc68395f6a1 --compress-destination-dir | tee /tmp/oryx-build.log ; exit $PIPESTATUS &quot;" >
+                <step title="Cpu: python(1106,27.680s)+ts(1107,0.150s)+build.sh(1105,0.000s)+build.sh(1104,0.000s)+build.sh(983,0.110s)+oryx(964,4.780s)+tee(965,0.000s)+bash(963,0.000s)=total(32.720s)" date="2025-11-27T15:08:32.788" /><!-- duration: 129ms -->
+                <step title="bash: no io activity for 60s, prev-cpu=-1.000s, current-cpu=32.720s" date="2025-11-27T15:08:32.958" /><!-- duration: 49ms -->
+              </step><!-- duration: 213253ms -->
+              <step title="Using PythonDeploymentLogParser" date="2025-11-27T15:09:52.435" /><!-- duration: 10ms -->
+              <step title="Triggering recycle (preview mode disabled)." date="2025-11-27T15:09:55.352" /><!-- duration: 41ms -->
+              <step title="Modified file to trigger a restart of the app container." date="2025-11-27T15:09:55.584" /><!-- duration: 11ms -->
+              <step title="Skip function trigger and logicapp sync because function is not enabled." date="2025-11-27T15:09:55.675" /><!-- duration: 11ms -->
+              <step title="Purge deployment items" date="2025-11-27T15:09:57.028" >
+                <step title="Remove a16ca79e-, Failed, received at 11/27/2025 14:53:44" date="2025-11-27T15:09:57.156" /><!-- duration: 12ms -->
+                <step title="Remove temp-a0cb, Failed, received at 11/27/2025 14:52:16" date="2025-11-27T15:09:57.239" /><!-- duration: 4ms -->
+              </step><!-- duration: 219ms -->
+            </step><!-- duration: 219435ms -->
+          </step><!-- duration: 220322ms -->
+          <step title="Cleaning up temp files" date="2025-11-27T15:09:57.389" /><!-- duration: 3268ms -->
+          <step title="Cleaning up temp files" date="2025-11-27T15:10:00.817" /><!-- duration: 561ms -->
+          <step title="Reloading status file with latest updates" date="2025-11-27T15:10:01.413" >
+            <step title="WebHooksManager.PublishEventAsync: PostDeployment" date="2025-11-27T15:10:01.417" /><!-- duration: 100ms -->
+          </step><!-- duration: 108ms -->
+          <step title="Cleaning up temporary deployment - fetch deployment was successful" date="2025-11-27T15:10:01.528" /><!-- duration: 3ms -->
+        </step><!-- duration: 224711ms -->
+      </step><!-- duration: 227122ms -->

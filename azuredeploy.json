@@ -1,0 +1,272 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "webAppName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name for the Web App (must be globally unique, will be used as <name>.azurewebsites.net)"
+      },
+      "minLength": 2,
+      "maxLength": 60
+    },
+    "openAIResourceName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name for the Azure OpenAI resource (must be globally unique)"
+      },
+      "minLength": 2,
+      "maxLength": 64
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "eastus2",
+      "allowedValues": [
+        "eastus",
+        "eastus2",
+        "northcentralus",
+        "southcentralus",
+        "westus",
+        "westus3",
+        "swedencentral",
+        "switzerlandnorth",
+        "francecentral",
+        "uksouth"
+      ],
+      "metadata": {
+        "description": "Azure region for resources. Choose a region that supports GPT-4o-mini."
+      }
+    },
+    "appServicePlanSku": {
+      "type": "string",
+      "defaultValue": "F1",
+      "allowedValues": [
+        "F1",
+        "B1",
+        "B2",
+        "B3",
+        "S1",
+        "S2",
+        "S3",
+        "P1v2",
+        "P2v2",
+        "P3v2"
+      ],
+      "metadata": {
+        "description": "App Service Plan pricing tier (F1=Free [no quota needed], B1=Basic $13/mo, S1=Standard $70/mo)"
+      }
+    },
+    "modelCapacity": {
+      "type": "int",
+      "defaultValue": 30,
+      "minValue": 1,
+      "maxValue": 300,
+      "metadata": {
+        "description": "Azure OpenAI tokens per minute capacity (in thousands). Default: 30K TPM"
+      }
+    },
+    "msalClientId": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Azure AD App Registration Client ID (leave empty to configure later)"
+      }
+    },
+    "msalTenantId": {
+      "type": "string",
+      "defaultValue": "organizations",
+      "metadata": {
+        "description": "Azure AD Tenant ID or 'organizations' for multi-tenant"
+      }
+    }
+  },
+  "variables": {
+    "appServicePlanName": "[concat(parameters('webAppName'), '-plan')]",
+    "cognitiveServicesApiVersion": "2023-05-01",
+    "deploymentName": "gpt-4o-mini"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Web/serverfarms",
+      "apiVersion": "2022-03-01",
+      "name": "[variables('appServicePlanName')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "[parameters('appServicePlanSku')]"
+      },
+      "kind": "linux",
+      "properties": {
+        "reserved": true
+      }
+    },
+    {
+      "type": "Microsoft.Web/sites",
+      "apiVersion": "2022-03-01",
+      "name": "[parameters('webAppName')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]"
+      ],
+      "properties": {
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('appServicePlanName'))]",
+        "siteConfig": {
+          "linuxFxVersion": "PYTHON|3.12",
+          "alwaysOn": "[if(equals(parameters('appServicePlanSku'), 'F1'), false(), true())]",
+          "appCommandLine": "gunicorn --bind=0.0.0.0:8000 --timeout 600 --chdir CA_Policy_Manager_Web app:app",
+          "pythonVersion": "3.12",
+          "appSettings": [
+            {
+              "name": "SCM_DO_BUILD_DURING_DEPLOYMENT",
+              "value": "true"
+            },
+            {
+              "name": "ENABLE_ORYX_BUILD",
+              "value": "true"
+            },
+            {
+              "name": "AI_ENABLED",
+              "value": "true"
+            },
+            {
+              "name": "AI_PROVIDER",
+              "value": "azure"
+            },
+            {
+              "name": "AZURE_OPENAI_ENDPOINT",
+              "value": "[reference(resourceId('Microsoft.CognitiveServices/accounts', parameters('openAIResourceName'))).endpoint]"
+            },
+            {
+              "name": "AZURE_OPENAI_DEPLOYMENT",
+              "value": "[variables('deploymentName')]"
+            },
+            {
+              "name": "MSAL_CLIENT_ID",
+              "value": "[parameters('msalClientId')]"
+            },
+            {
+              "name": "MSAL_TENANT_ID",
+              "value": "[parameters('msalTenantId')]"
+            },
+            {
+              "name": "MSAL_REDIRECT_PATH",
+              "value": "/auth/callback"
+            },
+            {
+              "name": "SESSION_TYPE",
+              "value": "filesystem"
+            },
+            {
+              "name": "DEMO_MODE",
+              "value": "false"
+            },
+            {
+              "name": "SECRET_KEY",
+              "value": "[uniqueString(resourceGroup().id, parameters('webAppName'), deployment().name)]"
+            },
+            {
+              "name": "AZURE_OPENAI_API_KEY",
+              "value": "[listKeys(resourceId('Microsoft.CognitiveServices/accounts', parameters('openAIResourceName')), variables('cognitiveServicesApiVersion')).key1]"
+            },
+            {
+              "name": "WEBSITES_PORT",
+              "value": "8000"
+            },
+            {
+              "name": "WEBSITE_HTTPLOGGING_RETENTION_DAYS",
+              "value": "3"
+            }
+          ]
+        },
+        "httpsOnly": true
+      }
+    },
+    {
+      "type": "Microsoft.Web/sites/sourcecontrols",
+      "apiVersion": "2022-03-01",
+      "name": "[concat(parameters('webAppName'), '/web')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]"
+      ],
+      "properties": {
+        "repoUrl": "https://github.com/AntonWilloughby/ConditionalAccessPolicyManager.git",
+        "branch": "main",
+        "isManualIntegration": false,
+        "deploymentRollbackEnabled": false,
+        "isMercurial": false,
+        "isGitHubAction": false
+      }
+    },
+    {
+      "type": "Microsoft.Web/sites/config",
+      "apiVersion": "2022-03-01",
+      "name": "[concat(parameters('webAppName'), '/web')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]",
+        "[resourceId('Microsoft.Web/sites/sourcecontrols', parameters('webAppName'), 'web')]"
+      ],
+      "properties": {
+        "appCommandLine": "gunicorn --bind=0.0.0.0:8000 --timeout 600 --chdir CA_Policy_Manager_Web app:app",
+        "scmType": "ExternalGit"
+      }
+    },
+    {
+      "type": "Microsoft.CognitiveServices/accounts",
+      "apiVersion": "[variables('cognitiveServicesApiVersion')]",
+      "name": "[parameters('openAIResourceName')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "S0"
+      },
+      "kind": "OpenAI",
+      "properties": {
+        "customSubDomainName": "[parameters('openAIResourceName')]",
+        "publicNetworkAccess": "Enabled"
+      }
+    },
+    {
+      "type": "Microsoft.CognitiveServices/accounts/deployments",
+      "apiVersion": "[variables('cognitiveServicesApiVersion')]",
+      "name": "[concat(parameters('openAIResourceName'), '/', variables('deploymentName'))]",
+      "dependsOn": [
+        "[resourceId('Microsoft.CognitiveServices/accounts', parameters('openAIResourceName'))]"
+      ],
+      "sku": {
+        "name": "Standard",
+        "capacity": "[parameters('modelCapacity')]"
+      },
+      "properties": {
+        "model": {
+          "format": "OpenAI",
+          "name": "gpt-4o-mini",
+          "version": "2024-07-18"
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "webAppUrl": {
+      "type": "string",
+      "value": "[concat('https://', reference(resourceId('Microsoft.Web/sites', parameters('webAppName'))).defaultHostName)]"
+    },
+    "webAppName": {
+      "type": "string",
+      "value": "[parameters('webAppName')]"
+    },
+    "openAIEndpoint": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.CognitiveServices/accounts', parameters('openAIResourceName'))).endpoint]"
+    },
+    "openAIResourceName": {
+      "type": "string",
+      "value": "[parameters('openAIResourceName')]"
+    },
+    "deploymentName": {
+      "type": "string",
+      "value": "[variables('deploymentName')]"
+    },
+    "nextSteps": {
+      "type": "string",
+      "value": "[concat('🎉 Deployment Complete!\n\nYour CA Policy Manager is deployed at:\nhttps://', reference(resourceId('Microsoft.Web/sites', parameters('webAppName'))).defaultHostName, '\n\n✅ WHAT WAS DEPLOYED:\n   • App Service with Python 3.12\n   • Azure OpenAI (GPT-4o-mini)\n   • Application code from GitHub\n   • Auto-configured secrets (SECRET_KEY, AZURE_OPENAI_API_KEY)\n\n⏱️  WAIT 5-10 MINUTES:\n   The application is currently building and deploying from GitHub.\n   This takes 5-10 minutes. You can monitor progress at:\n   https://', reference(resourceId('Microsoft.Web/sites', parameters('webAppName'))).defaultHostName, '.scm.azurewebsites.net/api/deployments\n\n🔐 NEXT STEP - CONFIGURE AUTHENTICATION:\n   \n   Option 1 - Enable Demo Mode (Quick Test):\n     • Azure Portal → ', parameters('webAppName'), ' → Configuration\n     • Add setting: DEMO_MODE=true\n     • Save and restart\n     • This lets you test the app without Azure AD authentication\n   \n   Option 2 - Production Authentication (Recommended):\n     a. Create Azure AD App Registration:\n        • Azure Portal → App registrations → New registration\n        • Name: CA Policy Manager\n        • Supported accounts: Multitenant\n        • Redirect URI: https://', reference(resourceId('Microsoft.Web/sites', parameters('webAppName'))).defaultHostName, '/auth/callback\n     \n     b. Enable Implicit Flow:\n        • Authentication → Implicit grant → Check ID tokens and Access tokens\n     \n     c. Grant API Permissions:\n        • API permissions → Add permission → Microsoft Graph → Delegated:\n          - User.Read\n          - Policy.Read.All\n          - Policy.ReadWrite.ConditionalAccess\n          - Directory.Read.All\n        • Grant admin consent\n     \n     d. Update App Settings:\n        • Configuration → New application setting\n        • MSAL_CLIENT_ID = <your app client id>\n        • MSAL_TENANT_ID = organizations\n        • Save and restart\n\n📚 DOCUMENTATION:\n   Complete Guide: https://github.com/AntonWilloughby/ConditionalAccessPolicyManager/blob/main/DEPLOY_BUTTON_COMPLETE_GUIDE.md\n   Troubleshooting: Run validation script after deployment completes')]"
+    }
+  }
+}
