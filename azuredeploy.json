@@ -181,6 +181,35 @@
       }
     },
     {
+      "type": "Microsoft.Web/sites/sourcecontrols",
+      "apiVersion": "2022-03-01",
+      "name": "[concat(parameters('webAppName'), '/web')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]"
+      ],
+      "properties": {
+        "repoUrl": "https://github.com/AntonWilloughby/ConditionalAccessPolicyManager.git",
+        "branch": "main",
+        "isManualIntegration": true,
+        "deploymentRollbackEnabled": false,
+        "isMercurial": false,
+        "isGitHubAction": false
+      }
+    },
+    {
+      "type": "Microsoft.Web/sites/config",
+      "apiVersion": "2022-03-01",
+      "name": "[concat(parameters('webAppName'), '/web')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites', parameters('webAppName'))]",
+        "[resourceId('Microsoft.Web/sites/sourcecontrols', parameters('webAppName'), 'web')]"
+      ],
+      "properties": {
+        "appCommandLine": "gunicorn --bind=0.0.0.0:8000 --timeout 600 --chdir CA_Policy_Manager_Web app:app",
+        "scmType": "ExternalGit"
+      }
+    },
+    {
       "type": "Microsoft.CognitiveServices/accounts",
       "apiVersion": "[variables('cognitiveServicesApiVersion')]",
       "name": "[parameters('openAIResourceName')]",
@@ -237,7 +266,7 @@
     },
     "nextSteps": {
       "type": "string",
-      "value": "[concat('Deployment Complete! Next Steps:\n\n1. DEPLOY CODE:\n   Method A - GitHub Integration (Recommended):\n     a. Fork https://github.com/AntonWilloughby/ConditionalAccessPolicyManager\n     b. Go to: ', reference(resourceId('Microsoft.Web/sites', parameters('webAppName'))).defaultHostName, ' → Deployment Center\n     c. Connect your forked GitHub repo\n     d. Select branch: main, folder: CA_Policy_Manager_Web\n   \n   Method B - Manual Deploy:\n     cd CA_Policy_Manager_Web\n     az webapp deploy --name ', parameters('webAppName'), ' --resource-group ', resourceGroup().name, ' --src-path . --type zip\n\n2. CONFIGURE AUTHENTICATION (Optional - needed for production use):\n   a. Create Azure AD App Registration:\n      - Azure Portal → App registrations → New registration\n      - Name: CA Policy Manager\n      - Supported accounts: Multitenant\n      - Redirect URI: https://', reference(resourceId('Microsoft.Web/sites', parameters('webAppName'))).defaultHostName, '/auth/callback\n   \n   b. Add App Settings:\n      - MSAL_CLIENT_ID = <your app client id>\n      - MSAL_TENANT_ID = organizations (or your tenant id)\n   \n   c. Grant API Permissions:\n      - Microsoft Graph → Delegated:\n        * User.Read\n        * Policy.Read.All\n        * Policy.ReadWrite.ConditionalAccess\n        * Directory.Read.All\n\n3. VERIFY DEPLOYMENT:\n   Open: https://', reference(resourceId('Microsoft.Web/sites', parameters('webAppName'))).defaultHostName, '\n\nNOTE: App is deployed in DEMO_MODE=false. To enable demo mode without authentication, set DEMO_MODE=true in App Service Configuration.')]"
+      "value": "[concat('🎉 Deployment Complete!\n\nYour CA Policy Manager is deployed at:\nhttps://', reference(resourceId('Microsoft.Web/sites', parameters('webAppName'))).defaultHostName, '\n\n✅ WHAT WAS DEPLOYED:\n   • App Service with Python 3.12\n   • Azure OpenAI (GPT-4o-mini)\n   • Application code from GitHub\n   • Auto-configured secrets (SECRET_KEY, AZURE_OPENAI_API_KEY)\n\n⏱️  WAIT 5-10 MINUTES:\n   The application is currently building and deploying from GitHub.\n   This takes 5-10 minutes. You can monitor progress at:\n   https://', reference(resourceId('Microsoft.Web/sites', parameters('webAppName'))).defaultHostName, '.scm.azurewebsites.net/api/deployments\n\n🔐 NEXT STEP - CONFIGURE AUTHENTICATION:\n   \n   Option 1 - Enable Demo Mode (Quick Test):\n     • Azure Portal → ', parameters('webAppName'), ' → Configuration\n     • Add setting: DEMO_MODE=true\n     • Save and restart\n     • This lets you test the app without Azure AD authentication\n   \n   Option 2 - Production Authentication (Recommended):\n     a. Create Azure AD App Registration:\n        • Azure Portal → App registrations → New registration\n        • Name: CA Policy Manager\n        • Supported accounts: Multitenant\n        • Redirect URI: https://', reference(resourceId('Microsoft.Web/sites', parameters('webAppName'))).defaultHostName, '/auth/callback\n     \n     b. Enable Implicit Flow:\n        • Authentication → Implicit grant → Check ID tokens and Access tokens\n     \n     c. Grant API Permissions:\n        • API permissions → Add permission → Microsoft Graph → Delegated:\n          - User.Read\n          - Policy.Read.All\n          - Policy.ReadWrite.ConditionalAccess\n          - Directory.Read.All\n        • Grant admin consent\n     \n     d. Update App Settings:\n        • Configuration → New application setting\n        • MSAL_CLIENT_ID = <your app client id>\n        • MSAL_TENANT_ID = organizations\n        • Save and restart\n\n📚 DOCUMENTATION:\n   Complete Guide: https://github.com/AntonWilloughby/ConditionalAccessPolicyManager/blob/main/DEPLOY_BUTTON_COMPLETE_GUIDE.md\n   Troubleshooting: Run validation script after deployment completes')]"
     }
   }
 }

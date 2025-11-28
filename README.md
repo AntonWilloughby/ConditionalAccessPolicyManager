@@ -34,12 +34,21 @@
 
 [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FAntonWilloughby%2FConditionalAccessPolicyManager%2Fmain%2Fazuredeploy.json)
 
-**⏱️ Time:** 15-20 minutes | **💰 Cost:** Free tier available (F1) or $13/month (B1)
+**⏱️ Time:** 10-15 minutes | **💰 Cost:** Free tier available (F1) or $13/month (B1)
 
-**📖 Important:** The Deploy button creates Azure resources but requires 2 additional manual steps:
+**✨ Fully Automated Deployment:**
 
-1. **Deploy application code** (via GitHub or Azure CLI)
-2. **Create Azure AD App Registration** (for authentication)
+- ✅ Creates Azure App Service + OpenAI
+- ✅ **Automatically deploys application code from GitHub**
+- ✅ Auto-generates all secrets (SECRET_KEY, API keys)
+- ✅ Configures all environment variables
+- ⏱️ Wait 5-10 minutes for build to complete after deployment
+
+**📋 What You Need to Do:**
+
+1. **Click button** → Fill parameters → Deploy (5-8 min)
+2. **Wait for build** → Code deploys automatically (5-10 min)
+3. **Create Azure AD App Registration** (5 min) - OR enable DEMO_MODE for testing
 
 **👉 [Complete Deployment Guide](DEPLOY_BUTTON_COMPLETE_GUIDE.md)** - Follow this for step-by-step instructions
 
