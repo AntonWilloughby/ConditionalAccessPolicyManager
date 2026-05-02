@@ -34,13 +34,13 @@ class PolicyAIAssistant:
                 
                 self.client = AzureOpenAI(**client_params)
                 self.model = self.config['AZURE_OPENAI_DEPLOYMENT']
-                print(f"✨ AI Assistant initialized (Azure OpenAI - {self.model})")
+                print("✨ AI Assistant initialized (Azure OpenAI)")
             
             elif self.provider == 'openai':
                 from openai import OpenAI
                 self.client = OpenAI(api_key=self.config['OPENAI_API_KEY'])
                 self.model = self.config['OPENAI_MODEL']
-                print(f"✨ AI Assistant initialized (OpenAI - {self.model})")
+                print("✨ AI Assistant initialized (OpenAI)")
             
             elif self.provider == 'local':
                 # For local models like Ollama
@@ -48,13 +48,13 @@ class PolicyAIAssistant:
                     import ollama
                     self.client = ollama
                     self.model = self.config.get('LOCAL_MODEL', 'phi3')
-                    print(f"✨ AI Assistant initialized (Local - {self.model})")
+                    print("✨ AI Assistant initialized (Local)")
                 except ImportError:
                     print("⚠️  Ollama not installed. Install with: pip install ollama")
                     self.ai_enabled = False
         
         except Exception as e:
-            print(f"⚠️  Failed to initialize AI client: {e}")
+            print("⚠️  Failed to initialize AI client")
             self.ai_enabled = False
     
     def explain_policy(self, policy_json: Dict[str, Any]) -> Dict[str, Any]:
