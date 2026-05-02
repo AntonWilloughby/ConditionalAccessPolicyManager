@@ -4,7 +4,7 @@ msal==1.25.0
 requests==2.31.0
 beautifulsoup4==4.12.2
 openpyxl==3.1.5
-urllib3==2.1.0
+urllib3==2.6.3
 gunicorn==22.0.0
 python-dotenv==1.2.2
 openai>=2.0.0
