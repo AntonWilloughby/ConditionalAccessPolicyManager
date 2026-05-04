@@ -1697,8 +1697,8 @@ def get_user_info():
             }), 401
             
     except Exception as e:
-        logger.error(f"Error getting user info: {e}")
-        return jsonify({'success': False, 'error': str(e)}), 500
+        logger.error("Error getting user info", exc_info=True)
+        return jsonify({'success': False, 'error': 'An internal error occurred'}), 500
 
 @app.route('/favicon.ico')
 def favicon():
